@@ -63,6 +63,28 @@ trait Dumper
         $pdo->setAttribute(PDO::ATTR_ORACLE_NULLS, PDO::NULL_NATURAL);
     }
 
+	/**
+	 * Get Dumper configurations option
+	 */
+	public function getOption(): Option
+	{
+		return $this->option;
+	}
+
+	/**
+	 * Set Dumper configurations option
+	 */
+	public function setOption(array|Option $option): static
+	{
+		if ($option instanceof Option) {
+			$this->option = $option;
+		} else {
+			$this->option->setOptions($option);
+		}
+
+		return $this;
+	}
+
     public function __call($name, $args)
     {
         if (str_starts_with($name, 'on')) {
