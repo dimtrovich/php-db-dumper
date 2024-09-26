@@ -218,7 +218,7 @@ class Exporter
                     '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . ' Driver: ' . $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . PHP_EOL .
                     '-- ' . PHP_EOL .
                     '-- Generated on: ' . date('r') . PHP_EOL .
-            		'-- ' . str_repeat('----------------------------------------------------', 2) . PHP_EOL . PHP_EOL;
+                    '-- ' . str_repeat('----------------------------------------------------', 2) . PHP_EOL . PHP_EOL;
         }
 
         return $header;
