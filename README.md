@@ -1,8 +1,8 @@
 # Dump and restore the contents of a database
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/dimtrovich/php-db-dumper.svg?style=flat-square)](https://packagist.org/packages/dimtrovich/php-db-dumper)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/dimtrovich/db-dumper.svg?style=flat-square)](https://packagist.org/packages/dimtrovich/db-dumper)
 [![Tests](https://img.shields.io/github/actions/workflow/status/dimtrovich/php-db-dumper/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/dimtrovich/php-db-dumper/actions/workflows/run-tests.yml)
-[![Total Downloads](https://img.shields.io/packagist/dt/dimtrovich/php-db-dumper.svg?style=flat-square)](https://packagist.org/packages/dimtrovich/php-db-dumper)
+[![Total Downloads](https://img.shields.io/packagist/dt/dimtrovich/db-dumper.svg?style=flat-square)](https://packagist.org/packages/dimtrovich/db-dumper)
 
 C'est là que devrait aller votre description. Essayez de le limiter à un paragraphe ou deux. Pensez à ajouter un petit exemple.
 
@@ -11,7 +11,7 @@ C'est là que devrait aller votre description. Essayez de le limiter à un parag
 Vous pouvez installer le package via composer :
 
 ```bash
-composer require dimtrovich/php-db-dumper
+composer require dimtrovich/db-dumper
 ```
 
 ## Utilisation
