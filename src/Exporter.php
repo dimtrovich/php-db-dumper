@@ -205,15 +205,17 @@ class Exporter
 
         if (! $this->option->skip_comments) {
             // Some info about software, source and time
-            $header = '-- Database Dumper https://github.com/dimtrovich/php-db-dumper' . PHP_EOL .
+            $header = '-- Database Backup Manager' . PHP_EOL .
+                    '-- This backup was created automatically by the Dimtrovich Db-Dumper. A simplest PHP Database Backup Manager' . PHP_EOL .
+                    '-- © ' . date('Y') . ' Dimitri Sitchet Tomkeu' . PHP_EOL .
+                    '-- https://github.com/dimtrovich/php-db-dumper' . PHP_EOL .
                     '-- ' . PHP_EOL .
+                    '-- Host: ' . $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL .
                     "-- Database: {$this->database}" . PHP_EOL .
-                    '-- ------------------------------------------------------' . PHP_EOL .
-                    '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . ' ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . PHP_EOL;
-
-            if (! $this->option->skip_dump_date) {
-                $header .= '-- Date: ' . date('r') . PHP_EOL . PHP_EOL;
-            }
+                    '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . ' Driver: ' . $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . PHP_EOL .
+                    '-- ' . PHP_EOL .
+                    '-- Generated on: ' . date('r') . PHP_EOL;
+            '-- ------------------------------------------------------' . PHP_EOL . PHP_EOL;
         }
 
         return $header;
