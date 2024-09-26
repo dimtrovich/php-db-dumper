@@ -37,7 +37,7 @@ Filters::apply($this, 'coverage', function ($next) {
     $reporters = $this->reporters();
     $coverage = new Coverage([
         'verbosity' => $this->commandLine()->get('coverage'),
-        'driver' => PHP_SAPI !== 'phpdbg' ? new Xdebug() : new Phpdbg(),
+        'driver' => PHP_SAPI !== 'phpdbg' ? new Xdebug : new Phpdbg,
         'path' => $this->commandLine()->get('src'),
         'colors' => ! $this->commandLine()->get('no-colors'),
     ]);
