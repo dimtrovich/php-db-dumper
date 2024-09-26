@@ -31,8 +31,8 @@ $options = [
 ];
 
 return Factory::create(new Blitz(), $overrides, $options)->forLibrary(
-    ':vendor_slug/:package_slug"',
-    ':author_name',
-    'author@domain.com',
+    'dimtrovich/db-dumper"',
+    'Dimitri Sitchet Tomkeu',
+    'dimitrisitchet@gmail.com',
     date('Y')
 );
