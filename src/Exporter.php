@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/db-dumper".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\DbDumper;
 
 use Dimtrovich\DbDumper\Exceptions\Exception;
@@ -7,46 +16,46 @@ use PDO;
 
 class Exporter
 {
-	use Dumper;
+    use Dumper;
 
     /**
-	 * List of registered tables
-	 */
+     * List of registered tables
+     */
     private array $tables = [];
 
-	/**
-	 * List of columns types for tables [$tableName => [$column => $type]]
-	 */
-	private array $tableColumnTypes = [];
+    /**
+     * List of columns types for tables [$tableName => [$column => $type]]
+     */
+    private array $tableColumnTypes = [];
 
-	/**
-	 * List of registered views
-	 */
+    /**
+     * List of registered views
+     */
     private array $views = [];
 
-	/**
-	 * List of registered triggers
-	 */
+    /**
+     * List of registered triggers
+     */
     private array $triggers = [];
 
-	/**
-	 * List of registered procedures
-	 */
-	private array $procedures = [];
+    /**
+     * List of registered procedures
+     */
+    private array $procedures = [];
 
-	/**
-	 * List of registered functions
-	 */
+    /**
+     * List of registered functions
+     */
     private array $functions = [];
 
-	/**
-	 * List of registered events
-	 */
+    /**
+     * List of registered events
+     */
     private array $events = [];
 
-	/**
-	 * @var callable
-	 */
+    /**
+     * @var callable
+     */
     private $transformTableRowCallable;
 
     /**
@@ -57,10 +66,10 @@ class Exporter
 
     private array $tableLimits = [];
 
-	/**
+    /**
      * Primary function, triggers dumping.
      *
-     * @param string $filename  Name of file to write sql dump to
+     * @param string $filename Name of file to write sql dump to
      */
     public function process(string $filename = 'php://stdout')
     {
@@ -105,7 +114,8 @@ class Exporter
         // This check will be removed once include-tables supports regexps.
         if ($this->option->include_tables !== []) {
             $name = implode(',', $this->option->include_tables);
-			throw Exception::tableNotFound($name);
+
+            throw Exception::tableNotFound($name);
         }
 
         $this->exportTables();
@@ -126,12 +136,11 @@ class Exporter
         // Write some stats to output file.
         $this->compressor->write($this->getDumpFileFooter());
 
-		// Close output file.
+        // Close output file.
         $this->compressor->close();
     }
 
-
-	/**
+    /**
      * Keyed by table name, with the value as the conditions:
      * e.g. 'users' => 'date_registered > NOW() - INTERVAL 6 MONTH AND deleted=0'
      */
@@ -141,14 +150,14 @@ class Exporter
     }
 
     /**
-     * @return boolean|mixed
+     * @return bool|mixed
      */
     public function getTableWhere(string $tableName)
     {
-        if (!empty($this->tableWheres[$tableName])) {
+        if (! empty($this->tableWheres[$tableName])) {
             return $this->tableWheres[$tableName];
         }
-		if ($this->option->where !== '') {
+        if ($this->option->where !== '') {
             return $this->option->where;
         }
 
@@ -166,41 +175,43 @@ class Exporter
 
     /**
      * Returns the LIMIT for the table.
-	 * Must be numeric to be returned.
+     * Must be numeric to be returned.
      *
-	 * @return int|false
+     * @param mixed $tableName
+     *
+     * @return false|int
      */
     public function getTableLimit($tableName)
     {
-        if (!isset($this->tableLimits[$tableName])) {
+        if (! isset($this->tableLimits[$tableName])) {
             return false;
         }
 
         $limit = $this->tableLimits[$tableName];
 
-        if (!is_numeric($limit)) {
+        if (! is_numeric($limit)) {
             return false;
         }
 
         return $limit;
     }
 
-	/**
+    /**
      * Returns header for dump file.
      */
     private function getDumpFileHeader(): string
     {
         $header = '';
 
-		if (!$this->option->skip_comments) {
+        if (! $this->option->skip_comments) {
             // Some info about software, source and time
             $header = '-- Database Dumper https://github.com/dimtrovich/php-db-dumper' . PHP_EOL .
-                    '-- ' .PHP_EOL.
+                    '-- ' . PHP_EOL .
                     "-- Database: {$this->database}" . PHP_EOL .
                     '-- ------------------------------------------------------' . PHP_EOL .
-					'-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . ' ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . PHP_EOL;
+                    '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . ' ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . PHP_EOL;
 
-            if (!$this->option->skip_dump_date) {
+            if (! $this->option->skip_dump_date) {
                 $header .= '-- Date: ' . date('r') . PHP_EOL . PHP_EOL;
             }
         }
@@ -215,39 +226,39 @@ class Exporter
     {
         $footer = '';
 
-        if (!$this->option->skip_comments) {
+        if (! $this->option->skip_comments) {
             $footer .= '-- Dump completed';
 
-            if (!$this->option->skip_dump_date) {
-                $footer .= ' on: '.date('r');
+            if (! $this->option->skip_dump_date) {
+                $footer .= ' on: ' . date('r');
             }
 
-			$footer .= PHP_EOL;
+            $footer .= PHP_EOL;
         }
 
         return $footer;
     }
 
-	/**
+    /**
      * Reads table names from database.
      * Fills $this->tables array so they will be dumped later.
      */
     private function getDatabaseStructureTables()
     {
-		$tables = $this->pdo->query($this->adapter->showTables($this->database));
+        $tables = $this->pdo->query($this->adapter->showTables($this->database));
 
         // Listing all tables from database
         if ($this->option->include_tables === []) {
             // include all tables for now, blacklisting happens later
             foreach ($tables as $row) {
-                array_push($this->tables, current($row));
+                $this->tables[] = current($row);
             }
         } else {
             // include only the tables mentioned in include-tables
             foreach ($tables as $row) {
                 if (in_array(current($row), $this->option->include_tables, true)) {
-                    array_push($this->tables, current($row));
-                    $elem = array_search(current($row), $this->option->include_tables);
+                    $this->tables[] = current($row);
+                    $elem           = array_search(current($row), $this->option->include_tables, true);
                     unset($this->option->include_tables[$elem]);
                 }
             }
@@ -260,27 +271,27 @@ class Exporter
      */
     private function getDatabaseStructureViews()
     {
-		$views = $this->pdo->query($this->adapter->showViews($this->database));
+        $views = $this->pdo->query($this->adapter->showViews($this->database));
 
         // Listing all views from database
         if ($this->option->include_views === []) {
             // include all views for now, blacklisting happens later
             foreach ($views as $row) {
-                array_push($this->views, current($row));
+                $this->views[] = current($row);
             }
         } else {
             // include only the tables mentioned in include-tables
             foreach ($views as $row) {
                 if (in_array(current($row), $this->option->include_views, true)) {
-                    array_push($this->views, current($row));
-                    $elem = array_search(current($row), $this->option->include_views);
+                    $this->views[] = current($row);
+                    $elem          = array_search(current($row), $this->option->include_views, true);
                     unset($this->option->include_views[$elem]);
                 }
             }
         }
     }
 
-	/**
+    /**
      * Reads trigger names from database.
      * Fills $this->tables array so they will be dumped later.
      */
@@ -289,10 +300,9 @@ class Exporter
         // Listing all triggers from database
         if ($this->option->skip_triggers) {
             foreach ($this->pdo->query($this->adapter->showTriggers($this->database)) as $row) {
-                array_push($this->triggers, $row['Trigger']);
+                $this->triggers[] = $row['Trigger'];
             }
         }
-        return;
     }
 
     /**
@@ -306,10 +316,9 @@ class Exporter
         // Listing all procedures from database
         if ($this->option->routines) {
             foreach ($this->pdo->query($this->adapter->showProcedures($this->database)) as $row) {
-                array_push($this->procedures, $row['procedure_name']);
+                $this->procedures[] = $row['procedure_name'];
             }
         }
-        return;
     }
 
     /**
@@ -323,7 +332,7 @@ class Exporter
         // Listing all functions from database
         if ($this->option->routines) {
             foreach ($this->pdo->query($this->adapter->showFunctions($this->database)) as $row) {
-                array_push($this->functions, $row['function_name']);
+                $this->functions[] = $row['function_name'];
             }
         }
     }
@@ -337,14 +346,14 @@ class Exporter
         // Listing all events from database
         if ($this->option->events) {
             foreach ($this->pdo->query($this->adapter->showEvents($this->database)) as $row) {
-                array_push($this->events, $row['event_name']);
+                $this->events[] = $row['event_name'];
             }
         }
     }
 
-	/**
+    /**
      * Compare if $table name matches with a definition inside $arr
-	 *
+     *
      * @param $arr array with strings or patterns
      */
     private function matches(string $table, array $arr): bool
@@ -352,15 +361,15 @@ class Exporter
         $match = false;
 
         foreach ($arr as $pattern) {
-            if ('/' != $pattern[0]) {
+            if ('/' !== $pattern[0]) {
                 continue;
             }
-            if (1 == preg_match($pattern, $table)) {
+            if (1 === preg_match($pattern, $table)) {
                 $match = true;
             }
         }
 
-        return in_array($table, $arr) || $match;
+        return in_array($table, $arr, true) || $match;
     }
 
     /**
@@ -376,7 +385,7 @@ class Exporter
 
             $this->getTableStructure($table);
 
-			if (false === $this->option->no_data) { // don't break compatibility with old trigger
+            if (false === $this->option->no_data) { // don't break compatibility with old trigger
                 $this->listValues($table);
             } elseif (true === $this->option->no_data || $this->matches($table, $this->option->no_data)) {
                 continue;
@@ -421,7 +430,6 @@ class Exporter
         foreach ($this->triggers as $trigger) {
             $this->getTriggerStructure($trigger);
         }
-
     }
 
     /**
@@ -462,13 +470,13 @@ class Exporter
      */
     private function getTableStructure(string $tableName)
     {
-        if (!$this->option->no_create_info) {
+        if (! $this->option->no_create_info) {
             $ret = '';
 
-            if (!$this->option->skip_comments) {
-                $ret = "--".PHP_EOL.
-                    "-- Table structure for table `$tableName`" . PHP_EOL.
-                    "--".PHP_EOL.PHP_EOL;
+            if (! $this->option->skip_comments) {
+                $ret = '--' . PHP_EOL .
+                    "-- Table structure for table `{$tableName}`" . PHP_EOL .
+                    '--' . PHP_EOL . PHP_EOL;
             }
 
             $stmt = $this->adapter->showCreateTable($tableName);
@@ -491,7 +499,7 @@ class Exporter
 
     /**
      * Store column types to create data dumps and for Stand-In tables
-	 *
+     *
      * @return array type column types detailed
      */
     private function getTableColumnTypes(string $tableName): array
@@ -504,14 +512,14 @@ class Exporter
         $columns->setFetchMode(PDO::FETCH_ASSOC);
 
         foreach ($columns as $key => $col) {
-            $types = $this->adapter->parseColumnType($col);
+            $types                      = $this->adapter->parseColumnType($col);
             $columnTypes[$col['Field']] = [
                 'is_numeric' => $types['is_numeric'],
                 'is_blob'    => $types['is_blob'],
                 'type'       => $types['type'],
                 'type_sql'   => $col['Type'],
-                'is_virtual' => $types['is_virtual']
-			];
+                'is_virtual' => $types['is_virtual'],
+            ];
         }
 
         return $columnTypes;
@@ -522,10 +530,10 @@ class Exporter
      */
     private function getViewStructureTable(string $viewName)
     {
-        if (!$this->option->skip_comments) {
-            $ret = "--".PHP_EOL.
-                "-- Stand-In structure for view `{$viewName}`".PHP_EOL.
-                "--".PHP_EOL.PHP_EOL;
+        if (! $this->option->skip_comments) {
+            $ret = '--' . PHP_EOL .
+                "-- Stand-In structure for view `{$viewName}`" . PHP_EOL .
+                '--' . PHP_EOL . PHP_EOL;
 
             $this->compressor->write($ret);
         }
@@ -549,16 +557,16 @@ class Exporter
      */
     public function createStandInTable(string $viewName): string
     {
-        $ret = array();
+        $ret = [];
 
         foreach ($this->tableColumnTypes[$viewName] as $k => $v) {
             $ret[] = "`{$k}` {$v['type_sql']}";
         }
 
-		$ret = implode(PHP_EOL.",", $ret);
+        $ret = implode(PHP_EOL . ',', $ret);
 
-        return "CREATE TABLE IF NOT EXISTS `$viewName` (".
-            PHP_EOL.$ret.PHP_EOL.");".PHP_EOL;
+        return "CREATE TABLE IF NOT EXISTS `{$viewName}` (" .
+            PHP_EOL . $ret . PHP_EOL . ');' . PHP_EOL;
     }
 
     /**
@@ -566,10 +574,10 @@ class Exporter
      */
     private function getViewStructureView(string $viewName)
     {
-        if (!$this->option->skip_comments) {
-            $ret = "--".PHP_EOL.
-                "-- View structure for view `{$viewName}`".PHP_EOL.
-                "--".PHP_EOL.PHP_EOL;
+        if (! $this->option->skip_comments) {
+            $ret = '--' . PHP_EOL .
+                "-- View structure for view `{$viewName}`" . PHP_EOL .
+                '--' . PHP_EOL . PHP_EOL;
             $this->compressor->write($ret);
         }
 
@@ -600,7 +608,7 @@ class Exporter
 
             $this->compressor->write($this->adapter->createTrigger($r));
 
-			return;
+            return;
         }
     }
 
@@ -609,16 +617,16 @@ class Exporter
      */
     private function getProcedureStructure(string $procedureName)
     {
-        if (!$this->option->skip_comments) {
-            $ret = "--".PHP_EOL.
-                "-- Dumping routines for database '".$this->database."'".PHP_EOL.
-                "--".PHP_EOL.PHP_EOL;
+        if (! $this->option->skip_comments) {
+            $ret = '--' . PHP_EOL .
+                "-- Dumping routines for database '" . $this->database . "'" . PHP_EOL .
+                '--' . PHP_EOL . PHP_EOL;
             $this->compressor->write($ret);
         }
 
         $stmt = $this->adapter->showCreateProcedure($procedureName);
 
-		foreach ($this->pdo->query($stmt) as $r) {
+        foreach ($this->pdo->query($stmt) as $r) {
             $this->compressor->write($this->adapter->createProcedure($r));
 
             return;
@@ -630,17 +638,17 @@ class Exporter
      */
     private function getFunctionStructure(string $functionName)
     {
-        if (!$this->option->skip_comments) {
-            $ret = "--".PHP_EOL.
-                "-- Dumping routines for database '".$this->database."'".PHP_EOL.
-                "--".PHP_EOL.PHP_EOL;
+        if (! $this->option->skip_comments) {
+            $ret = '--' . PHP_EOL .
+                "-- Dumping routines for database '" . $this->database . "'" . PHP_EOL .
+                '--' . PHP_EOL . PHP_EOL;
 
             $this->compressor->write($ret);
         }
 
-		$stmt = $this->adapter->showCreateFunction($functionName);
+        $stmt = $this->adapter->showCreateFunction($functionName);
 
-		foreach ($this->pdo->query($stmt) as $r) {
+        foreach ($this->pdo->query($stmt) as $r) {
             $this->compressor->write($this->adapter->createFunction($r));
 
             return;
@@ -652,35 +660,35 @@ class Exporter
      */
     private function getEventStructure(string $eventName)
     {
-        if (!$this->option->skip_comments) {
-            $ret = "--".PHP_EOL.
-                "-- Dumping events for database '".$this->database."'".PHP_EOL.
-                "--".PHP_EOL.PHP_EOL;
+        if (! $this->option->skip_comments) {
+            $ret = '--' . PHP_EOL .
+                "-- Dumping events for database '" . $this->database . "'" . PHP_EOL .
+                '--' . PHP_EOL . PHP_EOL;
 
             $this->compressor->write($ret);
         }
 
         $stmt = $this->adapter->showCreateEvent($eventName);
 
-		foreach ($this->pdo->query($stmt) as $r) {
+        foreach ($this->pdo->query($stmt) as $r) {
             $this->compressor->write($this->adapter->createEvent($r));
 
             return;
         }
     }
 
-	/**
+    /**
      * Prepare values for output
      *
      * @param array $row Associative array of column names and values to be quoted
      */
     private function prepareColumnValues(string $tableName, array $row): array
     {
-        $ret = array();
+        $ret         = [];
         $columnTypes = $this->tableColumnTypes[$tableName];
 
         if ($this->transformTableRowCallable) {
-            $row = call_user_func($this->transformTableRowCallable, $tableName, $row);
+            $row = ($this->transformTableRowCallable)($tableName, $row);
         }
 
         foreach ($row as $colName => $colValue) {
@@ -692,18 +700,23 @@ class Exporter
 
     /**
      * Escape values with quotes when needed
+     *
+     * @param mixed $colValue
+     * @param mixed $colType
      */
     private function escape($colValue, $colType)
     {
-        if (is_null($colValue)) {
-            return "NULL";
-        } elseif ($this->option->hex_blob && $colType['is_blob']) {
-            if ($colType['type'] == 'bit' || !empty($colValue)) {
+        if (null === $colValue) {
+            return 'NULL';
+        }
+        if ($this->option->hex_blob && $colType['is_blob']) {
+            if ($colType['type'] === 'bit' || ! empty($colValue)) {
                 return "0x{$colValue}";
-            } else {
-                return "''";
             }
-        } elseif ($colType['is_numeric']) {
+
+            return "''";
+        }
+        if ($colType['is_numeric']) {
             return $colValue;
         }
 
@@ -730,12 +743,12 @@ class Exporter
         // colStmt is used to form a query to obtain row values
         $colStmt = $this->getColumnStmt($tableName);
 
-		// colNames is used to get the name of the columns when using complete-insert
+        // colNames is used to get the name of the columns when using complete-insert
         if ($this->option->complete_insert) {
             $colNames = $this->getColumnNames($tableName);
         }
 
-        $stmt = "SELECT ".implode(",", $colStmt)." FROM `$tableName`";
+        $stmt = 'SELECT ' . implode(',', $colStmt) . " FROM `{$tableName}`";
 
         // Table specific conditions override the default 'where'
         $condition = $this->getTableWhere($tableName);
@@ -756,28 +769,28 @@ class Exporter
         $ignore = $this->option->insert_ignore ? '  IGNORE' : '';
 
         $count = 0;
-        $line = '';
+        $line  = '';
 
         foreach ($resultSet as $row) {
             $count++;
             $vals = $this->prepareColumnValues($tableName, $row);
-            if ($onlyOnce || !$this->option->extended_insert) {
+            if ($onlyOnce || ! $this->option->extended_insert) {
                 if ($this->option->complete_insert) {
-                    $line .= "INSERT$ignore INTO `$tableName` (".
-                        implode(", ", $colNames).
-                        ") VALUES (".implode(",", $vals).")";
+                    $line .= "INSERT{$ignore} INTO `{$tableName}` (" .
+                        implode(', ', $colNames) .
+                        ') VALUES (' . implode(',', $vals) . ')';
                 } else {
-                    $line .= "INSERT$ignore INTO `$tableName` VALUES (".implode(",", $vals).")";
+                    $line .= "INSERT{$ignore} INTO `{$tableName}` VALUES (" . implode(',', $vals) . ')';
                 }
                 $onlyOnce = false;
             } else {
-                $line .= ",(".implode(",", $vals).")";
+                $line .= ',(' . implode(',', $vals) . ')';
             }
 
-            if ((strlen($line) > $this->option->net_buffer_length) ||
-                    !$this->option->extended_insert) {
+            if ((strlen($line) > $this->option->net_buffer_length)
+                    || ! $this->option->extended_insert) {
                 $onlyOnce = true;
-                $this->compressor->write($line . ";".PHP_EOL);
+                $this->compressor->write($line . ';' . PHP_EOL);
                 $line = '';
             }
         }
@@ -785,12 +798,12 @@ class Exporter
         $resultSet->closeCursor();
 
         if ('' !== $line) {
-            $this->compressor->write($line. ";".PHP_EOL);
+            $this->compressor->write($line . ';' . PHP_EOL);
         }
 
         $this->endListValues($tableName, $count);
 
-		$this->event->emit('table.export', $tableName, $count);
+        $this->event->emit('table.export', $tableName, $count);
     }
 
     /**
@@ -798,15 +811,15 @@ class Exporter
      */
     public function prepareListValues(string $tableName)
     {
-        if (!$this->option->skip_comments) {
+        if (! $this->option->skip_comments) {
             $this->compressor->write(
-                "--".PHP_EOL.
-                "-- Dumping data for table `$tableName`".PHP_EOL.
-                "--".PHP_EOL.PHP_EOL
+                '--' . PHP_EOL .
+                "-- Dumping data for table `{$tableName}`" . PHP_EOL .
+                '--' . PHP_EOL . PHP_EOL
             );
         }
 
-        if ($this->option->lock_tables && !$this->option->single_transaction) {
+        if ($this->option->lock_tables && ! $this->option->single_transaction) {
             $this->adapter->lockTable($tableName);
         }
 
@@ -828,14 +841,12 @@ class Exporter
                 $this->adapter->startDisableAutocommit()
             );
         }
-
-        return;
     }
 
     /**
      * Table rows extractor, close locks and commits after dump
      *
-     * @param integer    $count     Number of rows inserted.
+     * @param int $count Number of rows inserted.
      */
     public function endListValues(string $tableName, int $count = 0)
     {
@@ -849,7 +860,7 @@ class Exporter
             $this->compressor->write($this->adapter->endAddLockTable($tableName));
         }
 
-        if ($this->option->lock_tables && !$this->option->single_transaction) {
+        if ($this->option->lock_tables && ! $this->option->single_transaction) {
             $this->adapter->unlockTable($tableName);
         }
 
@@ -862,14 +873,12 @@ class Exporter
 
         $this->compressor->write(PHP_EOL);
 
-        if (!$this->option->skip_comments) {
+        if (! $this->option->skip_comments) {
             $this->compressor->write(
-                "-- Dumped table `".$tableName."` with $count row(s)".PHP_EOL.
-                '--'.PHP_EOL.PHP_EOL
+                '-- Dumped table `' . $tableName . "` with {$count} row(s)" . PHP_EOL .
+                '--' . PHP_EOL . PHP_EOL
             );
         }
-
-        return;
     }
 
     /**
@@ -879,15 +888,18 @@ class Exporter
      */
     public function getColumnStmt(string $tableName): array
     {
-        $colStmt = array();
+        $colStmt = [];
+
         foreach ($this->tableColumnTypes[$tableName] as $colName => $colType) {
             if ($colType['is_virtual']) {
                 $this->option->complete_insert = true;
+
                 continue;
-            } elseif ($colType['type'] == 'bit' && $this->option->hex_blob) {
+            }
+            if ($colType['type'] === 'bit' && $this->option->hex_blob) {
                 $colStmt[] = "LPAD(HEX(`{$colName}`),2,'0') AS `{$colName}`";
-            } elseif ($colType['type'] == 'double' && PHP_VERSION_ID > 80100) {
-                $colStmt[] = sprintf("CONCAT(`%s`) AS `%s`", $colName, $colName);
+            } elseif ($colType['type'] === 'double' && PHP_VERSION_ID > 80100) {
+                $colStmt[] = sprintf('CONCAT(`%s`) AS `%s`', $colName, $colName);
             } elseif ($colType['is_blob'] && $this->option->hex_blob) {
                 $colStmt[] = "HEX(`{$colName}`) AS `{$colName}`";
             } else {
@@ -905,15 +917,15 @@ class Exporter
      */
     public function getColumnNames(string $tableName): array
     {
-        $colNames = array();
+        $colNames = [];
 
         foreach ($this->tableColumnTypes[$tableName] as $colName => $colType) {
             if ($colType['is_virtual']) {
                 $this->option->complete_insert = true;
+
                 continue;
-            } else {
-                $colNames[] = "`{$colName}`";
             }
+            $colNames[] = "`{$colName}`";
         }
 
         return $colNames;
