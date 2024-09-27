@@ -207,11 +207,11 @@ class Exporter
         $header = '';
 
         if (! $this->option->skip_comments) {
-			$divider = str_repeat('----------------------------------------------------', 2);
+            $divider = str_repeat('----------------------------------------------------', 2);
 
             // Some info about software, source and time
             $header = '-- ' . $divider . PHP_EOL . '-- ' . PHP_EOL .
-					'-- Database Backup Manager' . PHP_EOL .
+                    '-- Database Backup Manager' . PHP_EOL .
                     '-- This backup was created automatically by the Dimtrovich Db-Dumper. A simplest PHP Database Backup Manager' . PHP_EOL .
                     '-- © ' . date('Y') . ' Dimitri Sitchet Tomkeu' . PHP_EOL .
                     '-- https://github.com/dimtrovich/php-db-dumper' . PHP_EOL .
@@ -220,14 +220,14 @@ class Exporter
                     "-- Database: {$this->database}" . PHP_EOL .
                     '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . ' Driver: ' . $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . PHP_EOL;
 
-			if (! $this->option->skip_dump_date) {
-				$header .= '-- ' . PHP_EOL . '-- Generated on: ' . date('r') . PHP_EOL;
-			}
-			if ('' !== $this->option->message) {
-				$header .= '-- ' . PHP_EOL . trim($this->option->message) . PHP_EOL;
-			}
+            if (! $this->option->skip_dump_date) {
+                $header .= '-- ' . PHP_EOL . '-- Generated on: ' . date('r') . PHP_EOL;
+            }
+            if ('' !== $this->option->message) {
+                $header .= '-- ' . PHP_EOL . trim($this->option->message) . PHP_EOL;
+            }
 
-			$header .= '-- ' . PHP_EOL . $divider . PHP_EOL . PHP_EOL;
+            $header .= '-- ' . PHP_EOL . $divider . PHP_EOL . PHP_EOL;
         }
 
         return $header;

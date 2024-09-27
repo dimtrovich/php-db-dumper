@@ -57,12 +57,12 @@ final class Option
     public bool $skip_dump_date          = false;
     public bool $skip_definer            = false;
 
-	/**
-	 * Customised user message to be inserted in the header of the dumped file
-	 */
-	public string $message = '';
+    /**
+     * Customised user message to be inserted in the header of the dumped file
+     */
+    public string $message = '';
 
-    private array $options                  = [];
+    private array $options = [];
 
     public function __construct(array $options)
     {
@@ -87,9 +87,9 @@ final class Option
     {
         foreach ($options as $key => $val) {
             if (property_exists($this, $key)) {
-				if ($key === 'message' && $val !== '' && ! str_starts_with($val, '-- ')) {
-					$val = '-- ' . $val;
-				}
+                if ($key === 'message' && $val !== '' && ! str_starts_with($val, '-- ')) {
+                    $val = '-- ' . $val;
+                }
 
                 $this->{$key} = $val;
                 unset($options[$key]);
