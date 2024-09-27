@@ -13,7 +13,12 @@ namespace Dimtrovich\DbDumper;
 
 use Dimtrovich\DbDumper\Compressor\Factory as CompressorFactory;
 use Dimtrovich\DbDumper\Exceptions\Exception;
+use PDOException;
 
+/**
+ * @method void onTableCreate(callable(string $tableName) $callback)
+ * @method void onTableInsert(callable(string $tableName, int $rowCount) $callback)
+ */
 class Importer
 {
     use Dumper;
@@ -51,32 +56,36 @@ class Importer
 
         $buffer = '';
 
-        while (! feof($handle)) {
-            $line = fgets($handle);
-
-            if (substr($line, 0, 2) === '--' || ! $line) {
-                continue; // skip comments
-            }
-
-            $buffer .= $line;
-
-            // if it has a semicolon at the end, it's the end of the query
-            if (';' === substr(rtrim($line), -1, 1)) {
-                if (false !== $affectedRows = $this->pdo->exec($buffer)) {
-                    if (preg_match('/^CREATE TABLE `([^`]+)`/i', $buffer, $tableName)) {
-                        $this->event->emit('table.create', $tableName[1]);
-                    }
-                    if (preg_match('/^INSERT INTO `([^`]+)`/i', $buffer, $tableName)) {
-                        $this->event->emit('table.insert', $tableName[1], $affectedRows);
-                    }
-                }
-
-                $buffer = '';
-            }
-        }
-
-        fclose($handle);
-        unlink($filename);
+		try {
+			while (! feof($handle)) {
+				$line = fgets($handle);
+	
+				if (substr($line, 0, 2) === '--' || ! $line) {
+					continue; // skip comments
+				}
+	
+				$buffer .= $line;
+	
+				// if it has a semicolon at the end, it's the end of the query
+				if (';' === substr(rtrim($line), -1, 1)) {
+					if (false !== $affectedRows = $this->pdo->exec($buffer)) {
+						if (preg_match('/^CREATE TABLE `([^`]+)`/i', $buffer, $tableName)) {
+							$this->event->emit('table.create', $tableName[1]);
+						}
+						if (preg_match('/^INSERT INTO `([^`]+)`/i', $buffer, $tableName)) {
+							$this->event->emit('table.insert', $tableName[1], $affectedRows);
+						}
+					}
+	
+					$buffer = '';
+				}
+			}
+		} catch (PDOException $e) {
+			throw Exception::pdoException($e->getMessage(), $buffer);
+		} finally {
+			fclose($handle);
+			unlink($filename);
+		}
 
         if ($this->option->disable_foreign_keys_check) {
             $this->pdo->exec('SET foreign_key_checks = 1');

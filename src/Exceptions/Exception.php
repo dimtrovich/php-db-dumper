@@ -23,6 +23,20 @@ class Exception extends BaseException
     public const FILE_FAILL_TO_READ            = 501;
     public const FILE_FAILL_TO_WRITE           = 502;
     public const FILE_NOT_WRITABLE             = 503;
+    public const PDO_EXCEPTION                 = 1601;
+
+	/**
+	 * Error meta informations
+	 */
+	private array $meta = [];
+
+	/**
+	 * Get exception meta informations
+	 */
+	public function getMeta(): array
+	{
+		return $this->meta;
+	}
 
     public static function invalidCompressor(string $compressor): self
     {
@@ -63,4 +77,15 @@ class Exception extends BaseException
     {
         return new self(sprintf('Database type support for "%s" not yet available', $adapter), self::DATABASE_INVALID_ADAPTER);
     }
+
+	public static function pdoException(string $message, string $sql): self
+	{
+		$message         = trim($message);
+		$sql             = trim($sql);
+
+		$exception       = new self(sprintf('Error during request "%s" execution. Error: "%s"', $sql, $message), self::PDO_EXCEPTION);
+		$exception->meta = compact('message', 'sql');
+
+		return $exception;
+	}
 }
