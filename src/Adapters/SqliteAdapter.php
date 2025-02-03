@@ -11,8 +11,33 @@
 
 namespace Dimtrovich\DbDumper\Adapters;
 
+use Dimtrovich\DbDumper\Exceptions\Exception;
+
 class SqliteAdapter extends Factory
 {
+	// Numerical SQLITE types
+    public $sqliteTypes = [
+        'numerical' => [
+			'INT',
+			'INTEGER',
+			'TINYINT',
+			'SMALLINT',
+			'MEDIUMINT',
+			'BIGINT',
+			'UNSIGNED BIG INT',
+			'INT2',
+			'INT8',
+			'REAL',
+			'DOUBLE',
+			'DOUBLE PRECISION',
+			'FLOAT',
+            'NUMERIC',
+        ],
+        'blob' => [
+            'BLOB',
+        ],
+    ];
+
     /**
      * {@inheritDoc}
      */
@@ -21,6 +46,28 @@ class SqliteAdapter extends Factory
         return "SELECT tbl_name as 'Table', sql as 'Create Table' " .
             'FROM sqlite_master ' .
             "WHERE type='table' AND tbl_name='{$tableName}'";
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public function createTable(array $row): string
+    {
+        if (! isset($row['Create Table'])) {
+            throw new Exception('Error getting table code, unknown output');
+        }
+
+        $createTable = $row['Create Table'];
+
+        if ($this->option->reset_auto_increment) {
+            $createTable = 'DELETE FROM sqlite_sequence WHERE name=\'' . $row['Table'] .'\'' . PHP_EOL . $createTable;
+        }
+
+        if ($this->option->if_not_exists) {
+            $createTable = preg_replace('/^CREATE TABLE/', 'CREATE TABLE IF NOT EXISTS', $createTable);
+        }
+
+        return $createTable . ';' . PHP_EOL;
     }
 
     /**
@@ -38,7 +85,7 @@ class SqliteAdapter extends Factory
      */
     public function showTables(): string
     {
-        return "SELECT tbl_name FROM sqlite_master WHERE type='table'";
+        return "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name NOT LIKE 'sqlite_%'";
     }
 
     /**
@@ -46,7 +93,7 @@ class SqliteAdapter extends Factory
      */
     public function showViews(): string
     {
-        return "SELECT tbl_name FROM sqlite_master WHERE type='view'";
+        return "SELECT tbl_name FROM sqlite_master WHERE type='view' AND tbl_name NOT LIKE 'sqlite_%'";
     }
 
     /**
@@ -54,7 +101,7 @@ class SqliteAdapter extends Factory
      */
     public function showTriggers(): string
     {
-        return "SELECT name FROM sqlite_master WHERE type='trigger'";
+        return "SELECT name FROM sqlite_master WHERE type='trigger' AND tbl_name NOT LIKE 'sqlite_%'";
     }
 
     /**
@@ -87,5 +134,19 @@ class SqliteAdapter extends Factory
     public function commitTransaction(): string
     {
         return 'COMMIT';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function parseColumnType(array $colType): array
+    {
+        $colInfo = parent::_parseColumnType($colType, $this->sqliteTypes);
+        // for virtual columns that are of type 'Extra', column type
+        // could by "STORED GENERATED" or "VIRTUAL GENERATED"
+        // MySQL reference: https://dev.mysql.com/doc/refman/5.7/en/create-table-generated-columns.html
+        // $colInfo['is_virtual'] = str_contains($colType['Extra'], 'VIRTUAL GENERATED') || str_contains($colType['Extra'], 'STORED GENERATED');
+
+        return $colInfo;
     }
 }

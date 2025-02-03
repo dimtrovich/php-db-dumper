@@ -64,15 +64,17 @@ final class Option
 
     private array $options = [];
 
-    public function __construct(array $options)
+    public function __construct(array $options, string $driver = 'mysql')
     {
         $this->setOptions($options);
 
-        $this->init_commands[] = 'SET NAMES ' . $this->default_character_set;
+		if ($driver === 'mysql') {
+			$this->init_commands[] = 'SET NAMES ' . $this->default_character_set;
 
-        if (false === $this->skip_tz_utc) {
-            $this->init_commands[] = "SET TIME_ZONE='+00:00'";
-        }
+			if (false === $this->skip_tz_utc) {
+				$this->init_commands[] = "SET TIME_ZONE='+00:00'";
+			}
+		}
 
         // If no include-views is passed in, dump the same views as tables, mimic mysqldump behaviour.
         if ($this->include_views === []) {
@@ -81,7 +83,7 @@ final class Option
     }
 
     /**
-     * Defini les options d'exportation de la base de donnees
+     * Define backup options of database
      */
     public function setOptions(array $options = []): self
     {

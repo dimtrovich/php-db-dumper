@@ -581,19 +581,6 @@ class MysqlAdapter extends Factory
     /**
      * {@inheritDoc}
      *
-     * @param string $table
-     */
-    public function dropTable(): string
-    {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $table = func_get_arg(0);
-
-        return "DROP TABLE IF EXISTS `{$table}`;" . PHP_EOL;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @param string $view
      */
     public function dropView(): string
@@ -610,18 +597,7 @@ class MysqlAdapter extends Factory
      */
     public function parseColumnType(array $colType): array
     {
-        $colInfo  = [];
-        $colParts = explode(' ', $colType['Type']);
-
-        if ($fparen = strpos($colParts[0], '(')) {
-            $colInfo['type']       = substr($colParts[0], 0, $fparen);
-            $colInfo['length']     = str_replace(')', '', substr($colParts[0], $fparen + 1));
-            $colInfo['attributes'] = $colParts[1] ?? null;
-        } else {
-            $colInfo['type'] = $colParts[0];
-        }
-        $colInfo['is_numeric'] = in_array($colInfo['type'], $this->mysqlTypes['numerical'], true);
-        $colInfo['is_blob']    = in_array($colInfo['type'], $this->mysqlTypes['blob'], true);
+		$colInfo = parent::_parseColumnType($colType, $this->mysqlTypes);
         // for virtual columns that are of type 'Extra', column type
         // could by "STORED GENERATED" or "VIRTUAL GENERATED"
         // MySQL reference: https://dev.mysql.com/doc/refman/5.7/en/create-table-generated-columns.html
@@ -681,16 +657,5 @@ class MysqlAdapter extends Factory
             '/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;' . PHP_EOL . PHP_EOL;
 
         return $ret;
-    }
-
-    /**
-     * Check number of parameters passed to function, useful when inheriting.
-     * Raise exception if unexpected.
-     */
-    private function checkParameters(int $num_args, int $expected_num_args, string $method_name)
-    {
-        if ($num_args !== $expected_num_args) {
-            throw new Exception("Unexpected parameter passed to {$method_name}");
-        }
     }
 }
