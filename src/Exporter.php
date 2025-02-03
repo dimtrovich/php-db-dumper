@@ -549,13 +549,18 @@ class Exporter
         );
         $columns->setFetchMode(PDO::FETCH_ASSOC);
 
-        foreach ($columns as $key => $col) {
+		foreach ($columns as $key => $col) {
+			$field = $col['Field'] ?? ($col['name'] ?? '');
+			if ($field === '') {
+				continue; // skip if field name is empty (MySQL 8.0+ returns empty name for computed columns)
+			}
+
             $types                      = $this->adapter->parseColumnType($col);
-            $columnTypes[$col['Field']] = [
+            $columnTypes[$field] = [
                 'is_numeric' => $types['is_numeric'],
                 'is_blob'    => $types['is_blob'],
                 'type'       => $types['type'],
-                'type_sql'   => $col['Type'],
+                'type_sql'   => $types['type_sql'] ?? $col['Type'],
                 'is_virtual' => $types['is_virtual'],
             ];
         }
