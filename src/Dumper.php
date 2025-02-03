@@ -38,6 +38,11 @@ trait Dumper
      */
     private Event $event;
 
+	/**
+     * Database driver
+     */
+	private string $driver;
+
     /**
      * The cache of dot-cased words.
      */
@@ -45,12 +50,12 @@ trait Dumper
 
     public function __construct(private string $database, private PDO $pdo, array $options = [])
     {
-        $this->option     = new Option($options);
+        $this->option     = new Option($options, $this->driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
         $this->event      = new Event();
         $this->compressor = CompressorFactory::create($this->option->compress);
         $this->adapter    = AdapterFactory::create($pdo, $this->option);
 
-        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
+        if ($this->driver === 'mysql') {
             // This drops MYSQL dependency, only use the constant if it's defined.
             $pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         }

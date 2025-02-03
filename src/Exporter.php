@@ -84,8 +84,12 @@ class Exporter
 
         // initiate a transaction at global level to create a consistent snapshot
         if ($this->option->single_transaction) {
-            $this->pdo->exec($this->adapter->setupTransaction());
-            $this->pdo->exec($this->adapter->startTransaction());
+            if ('' !== $setupTransaction = $this->adapter->setupTransaction()) {
+				$this->pdo->exec($setupTransaction);
+			}
+			if ('' !== $startTransaction = $this->adapter->startTransaction()) {
+                $this->pdo->exec($startTransaction);
+            }
         }
 
         // Store server settings and use sanner defaults to dump
@@ -167,6 +171,16 @@ class Exporter
         return false;
     }
 
+	/**
+	 * Sets a WHERE condition for a specific table during the export process.
+	 */
+	public function where(string $table, string $condition): self
+	{
+		$this->tableWheres[$table] = $condition;
+
+		return $this;
+	}
+
     /**
      * Keyed by table name, with the value as the numeric limit:
      * e.g. 'users' => 3000
@@ -180,11 +194,9 @@ class Exporter
      * Returns the LIMIT for the table.
      * Must be numeric to be returned.
      *
-     * @param mixed $tableName
-     *
      * @return false|int
      */
-    public function getTableLimit($tableName)
+    public function getTableLimit(string $tableName)
     {
         if (! isset($this->tableLimits[$tableName])) {
             return false;
@@ -198,6 +210,16 @@ class Exporter
 
         return $limit;
     }
+
+	/**
+	 * Sets a LIMIT condition for a specific table during the export process.
+	 */
+	public function limit(string $table, int $limit): self
+	{
+		$this->tableLimits[$table] = $limit;
+
+		return $this;
+	}
 
     /**
      * Returns header for dump file.
@@ -215,10 +237,12 @@ class Exporter
                     '-- This backup was created automatically by the Dimtrovich Db-Dumper. A simplest PHP Database Backup Manager' . PHP_EOL .
                     '-- © ' . date('Y') . ' Dimitri Sitchet Tomkeu' . PHP_EOL .
                     '-- https://github.com/dimtrovich/php-db-dumper' . PHP_EOL .
-                    '-- ' . PHP_EOL .
-                    '-- Host: ' . $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL .
-                    "-- Database: {$this->database}" . PHP_EOL .
-                    '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . ' Driver: ' . $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . PHP_EOL;
+                    '-- ' . PHP_EOL;
+			if ($this->driver !== 'sqlite' ) {
+		$header .=  '-- Host: ' . $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
+			}
+        $header .=  "-- Database: {$this->database}" . PHP_EOL .
+                    '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . ' Driver: ' . $this->driver . PHP_EOL;
 
             if (! $this->option->skip_dump_date) {
                 $header .= '-- ' . PHP_EOL . '-- Generated on: ' . date('r') . PHP_EOL;
