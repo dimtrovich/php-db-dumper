@@ -535,6 +535,22 @@ class MysqlAdapter extends Factory
             PHP_EOL;
     }
 
+	/**
+     * {@inheritDoc}
+     */
+    public function startDisableForeignKeysCheck(): string
+    {
+        return 'SET foreign_key_checks = 0';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function endDisableForeignKeysCheck(): string
+    {
+        return 'SET foreign_key_checks = 1';
+    }
+
     /**
      * {@inheritDoc}
      */

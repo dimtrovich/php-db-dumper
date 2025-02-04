@@ -20,4 +20,9 @@ describe('Option', function() {
         $option->non_existent_option = 'test';
         expect($option->non_existent_option)->toBe('test');
 	});
+
+	it('should ignore numeric key as option ', function() {
+		$option = new Option(['non_existent_option']);
+        expect($option->non_existent_option)->toBeNull();
+	});
 });
