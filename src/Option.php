@@ -57,6 +57,8 @@ final class Option
     public bool $skip_dump_date          = false;
     public bool $skip_definer            = false;
 
+	public bool $disable_foreign_keys_check = true;
+
     /**
      * Customised user message to be inserted in the header of the dumped file
      */
@@ -80,6 +82,8 @@ final class Option
         if ($this->include_views === []) {
             $this->include_views = $this->include_tables;
         }
+
+		$this->disable_foreign_keys_check = true;
     }
 
     /**
@@ -87,6 +91,8 @@ final class Option
      */
     public function setOptions(array $options = []): self
     {
+		unset($options['disable_foreign_keys_check']);
+
         foreach ($options as $key => $val) {
             if (property_exists($this, $key)) {
                 if ($key === 'message' && $val !== '' && ! str_starts_with($val, '-- ')) {

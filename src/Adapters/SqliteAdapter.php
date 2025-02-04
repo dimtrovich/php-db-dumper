@@ -136,6 +136,22 @@ class SqliteAdapter extends Factory
         return 'COMMIT';
     }
 
+	/**
+     * {@inheritDoc}
+     */
+    public function startDisableForeignKeysCheck(): string
+    {
+        return 'PRAGMA foreign_keys = OFF;';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function endDisableForeignKeysCheck(): string
+    {
+        return 'PRAGMA foreign_keys = ON;';
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -268,7 +268,7 @@ abstract class Factory
      */
     public function startDisableForeignKeysCheck(): string
     {
-        return PHP_EOL;
+        return '';
     }
 
     /**
@@ -276,7 +276,7 @@ abstract class Factory
      */
     public function endDisableForeignKeysCheck(): string
     {
-        return PHP_EOL;
+        return '';
     }
 
     /**

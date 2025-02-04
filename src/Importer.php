@@ -41,8 +41,8 @@ class Importer
 
         $filename = $this->getFile($filename);
 
-        if ($this->option->disable_foreign_keys_check) {
-            $this->pdo->exec('SET foreign_key_checks = 0');
+        if ($this->option->disable_foreign_keys_check && '' !== $disableForeignKeysCheck = $this->adapter->startDisableForeignKeysCheck()) {
+            $this->pdo->exec($disableForeignKeysCheck);
         }
 
         /**
@@ -87,8 +87,8 @@ class Importer
             unlink($filename);
         }
 
-        if ($this->option->disable_foreign_keys_check) {
-            $this->pdo->exec('SET foreign_key_checks = 1');
+        if ($this->option->disable_foreign_keys_check && '' !== $enableForeignKeysCheck = $this->adapter->endDisableForeignKeysCheck()) {
+            $this->pdo->exec($enableForeignKeysCheck);
         }
     }
 
