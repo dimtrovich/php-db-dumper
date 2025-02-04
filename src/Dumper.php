@@ -43,11 +43,6 @@ trait Dumper
      */
 	private string $driver;
 
-    /**
-     * The cache of dot-cased words.
-     */
-    protected static $dotCache = [];
-
     public function __construct(private string $database, private PDO $pdo, array $options = [])
     {
         $this->option     = new Option($options, $this->driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
@@ -93,7 +88,7 @@ trait Dumper
     public function __call($name, $args)
     {
         if (str_starts_with($name, 'on')) {
-            $name = static::toDot(substr($name, 2));
+            $name = CaseConverter::toDot(substr($name, 2));
 
             $this->event->on($name, array_shift($args));
 
@@ -101,22 +96,5 @@ trait Dumper
         }
 
         throw new BadMethodCallException(sprintf('Method "%s" is not allowed to be called on "%s"', $name, static::class));
-    }
-
-    public static function toDot(string $value): string
-    {
-        $key = $value;
-
-        if (isset(static::$dotCache[$key])) {
-            return static::$dotCache[$key];
-        }
-
-        if (! ctype_lower($value)) {
-            $value = preg_replace('/\s+/u', '', ucwords($value));
-
-            $value = strtolower(preg_replace('/(.)(?=[A-Z])/u', '$1_', $value));
-        }
-
-        return static::$dotCache[$key] = str_replace('_', '.', $value);
     }
 }

@@ -94,7 +94,15 @@ final class Option
 		unset($options['disable_foreign_keys_check']);
 
         foreach ($options as $key => $val) {
-            if (property_exists($this, $key)) {
+			if (is_int($key)) {
+				continue;
+			}
+
+			if (! property_exists($this, $key)) {
+				$key = CaseConverter::toSnake($key);
+			}
+
+			if (property_exists($this, $key)) {
                 if ($key === 'message' && $val !== '' && ! str_starts_with($val, '-- ')) {
                     $val = '-- ' . $val;
                 }
@@ -104,18 +112,18 @@ final class Option
             }
         }
 
-        $this->options = $options;
+        $this->options = array_map([CaseConverter::class, 'toSnake'], $options);
 
         return $this;
     }
 
     public function __get($name)
     {
-        return $this->options[$name] ?? null;
+        return $this->options[CaseConverter::toSnake($name)] ?? null;
     }
 
     public function __set($name, $value)
     {
-        $this->options[$name] = $value;
+        $this->options[CaseConverter::toSnake($name)] = $value;
     }
 }
