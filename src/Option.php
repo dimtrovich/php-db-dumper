@@ -23,41 +23,40 @@ final class Option
     public const COMPRESSION_NONE       = 'None';
     public const COMPRESSION_GZIPSTREAM = 'GzipStream';
 
-    public string $compress              = self::COMPRESSION_NONE;
-    public string $default_character_set = self::CHARSET_UTF8;
-    public string $where                 = '';
-    public int $net_buffer_length        = self::MAXLINESIZE;
-    public array $include_tables         = [];
-    public array $exclude_tables         = [];
-    public array $include_views          = [];
-    public array $init_commands          = [];
-    public array $no_data                = [];
-    public bool $if_not_exists           = false;
-    public bool $reset_auto_increment    = false;
-    public bool $add_drop_database       = false;
-    public bool $add_drop_table          = false;
-    public bool $add_drop_trigger        = true;
-    public bool $add_locks               = true;
-    public bool $complete_insert         = false;
-    public bool $databases               = false;
-    public bool $disable_keys            = true;
-    public bool $extended_insert         = true;
-    public bool $events                  = false;
-    public bool $hex_blob                = true;   // faster than escaped onent
-    public bool $insert_ignore           = false;
-    public bool $no_autocommit           = true;
-    public bool $no_create_db            = false;
-    public bool $no_create_info          = false;
-    public bool $lock_tables             = true;
-    public bool $routines                = false;
-    public bool $single_transaction      = true;
-    public bool $skip_triggers           = false;
-    public bool $skip_tz_utc             = false;
-    public bool $skip_comments           = false;
-    public bool $skip_dump_date          = false;
-    public bool $skip_definer            = false;
-
-	public bool $disable_foreign_keys_check = true;
+    public string $compress                 = self::COMPRESSION_NONE;
+    public string $default_character_set    = self::CHARSET_UTF8;
+    public string $where                    = '';
+    public int $net_buffer_length           = self::MAXLINESIZE;
+    public array $include_tables            = [];
+    public array $exclude_tables            = [];
+    public array $include_views             = [];
+    public array $init_commands             = [];
+    public array $no_data                   = [];
+    public bool $if_not_exists              = false;
+    public bool $reset_auto_increment       = false;
+    public bool $add_drop_database          = false;
+    public bool $add_drop_table             = false;
+    public bool $add_drop_trigger           = true;
+    public bool $add_locks                  = true;
+    public bool $complete_insert            = false;
+    public bool $databases                  = false;
+    public bool $disable_keys               = true;
+    public bool $extended_insert            = true;
+    public bool $events                     = false;
+    public bool $hex_blob                   = true;   // faster than escaped onent
+    public bool $insert_ignore              = false;
+    public bool $no_autocommit              = true;
+    public bool $no_create_db               = false;
+    public bool $no_create_info             = false;
+    public bool $lock_tables                = true;
+    public bool $routines                   = false;
+    public bool $single_transaction         = true;
+    public bool $skip_triggers              = false;
+    public bool $skip_tz_utc                = false;
+    public bool $skip_comments              = false;
+    public bool $skip_dump_date             = false;
+    public bool $skip_definer               = false;
+    public bool $disable_foreign_keys_check = true;
 
     /**
      * Customised user message to be inserted in the header of the dumped file
@@ -70,20 +69,20 @@ final class Option
     {
         $this->setOptions($options);
 
-		if ($driver === 'mysql') {
-			$this->init_commands[] = 'SET NAMES ' . $this->default_character_set;
+        if ($driver === 'mysql') {
+            $this->init_commands[] = 'SET NAMES ' . $this->default_character_set;
 
-			if (false === $this->skip_tz_utc) {
-				$this->init_commands[] = "SET TIME_ZONE='+00:00'";
-			}
-		}
+            if (false === $this->skip_tz_utc) {
+                $this->init_commands[] = "SET TIME_ZONE='+00:00'";
+            }
+        }
 
         // If no include-views is passed in, dump the same views as tables, mimic mysqldump behaviour.
         if ($this->include_views === []) {
             $this->include_views = $this->include_tables;
         }
 
-		$this->disable_foreign_keys_check = true;
+        $this->disable_foreign_keys_check = true;
     }
 
     /**
@@ -91,18 +90,18 @@ final class Option
      */
     public function setOptions(array $options = []): self
     {
-		unset($options['disable_foreign_keys_check']);
+        unset($options['disable_foreign_keys_check']);
 
         foreach ($options as $key => $val) {
-			if (is_int($key)) {
-				continue;
-			}
+            if (is_int($key)) {
+                continue;
+            }
 
-			if (! property_exists($this, $key)) {
-				$key = CaseConverter::toSnake($key);
-			}
+            if (! property_exists($this, $key)) {
+                $key = CaseConverter::toSnake($key);
+            }
 
-			if (property_exists($this, $key)) {
+            if (property_exists($this, $key)) {
                 if ($key === 'message' && $val !== '' && ! str_starts_with($val, '-- ')) {
                     $val = '-- ' . $val;
                 }

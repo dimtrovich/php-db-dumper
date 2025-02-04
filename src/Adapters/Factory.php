@@ -217,8 +217,8 @@ abstract class Factory
 
     /**
      * Perform lock table
-	 *
-	 * @return false|int
+     *
+     * @return false|int
      */
     public function lockTable(string $table)
     {
@@ -227,8 +227,8 @@ abstract class Factory
 
     /**
      * Perform unlock table
-	 *
-	 * @return false|int
+     *
+     * @return false|int
      */
     public function unlockTable(string $table)
     {
@@ -342,53 +342,53 @@ abstract class Factory
      */
     public function parseColumnType(array $colType): array
     {
-		return $this->_parseColumnType($colType, []);
-	}
+        return $this->_parseColumnType($colType, []);
+    }
 
-	/**
-	 * Parse the column type and extract detailed information.
-	*
-	* This function takes the column type information and an optional mapping of types,
-	* and returns an array with detailed information about the column's properties.
-	*
-	* @param array $colType An array containing the column type information.
-	*                       Expected to have either a 'type' or 'Type' key.
-	* @param array $mapTypes An optional array containing mappings for numerical and blob types.
-	*                        Expected to have 'numerical' and 'blob' keys as arrays.
-	*
-	* @return array An array containing parsed column information including:
-	*               - type: The base type of the column
-	*               - length: The length or precision of the column (if applicable)
-	*               - attributes: Any additional attributes of the column
-	*               - type_sql: The full SQL type definition
-	*               - is_numeric: Boolean indicating if the type is numeric
-	*               - is_blob: Boolean indicating if the type is a blob
-	*               - is_virtual: Boolean indicating if the column is virtual (always false in this implementation)
-	*/
-	protected function _parseColumnType(array $colType, array $mapTypes = []): array
- 	{
-		if ('' === $type = $colType['type'] ?? ($colType['Type'] ?? '')) {
-			return [];
-		}
+    /**
+     * Parse the column type and extract detailed information.
+     *
+     * This function takes the column type information and an optional mapping of types,
+     * and returns an array with detailed information about the column's properties.
+     *
+     * @param array $colType  An array containing the column type information.
+     *                        Expected to have either a 'type' or 'Type' key.
+     * @param array $mapTypes An optional array containing mappings for numerical and blob types.
+     *                        Expected to have 'numerical' and 'blob' keys as arrays.
+     *
+     * @return array An array containing parsed column information including:
+     *               - type: The base type of the column
+     *               - length: The length or precision of the column (if applicable)
+     *               - attributes: Any additional attributes of the column
+     *               - type_sql: The full SQL type definition
+     *               - is_numeric: Boolean indicating if the type is numeric
+     *               - is_blob: Boolean indicating if the type is a blob
+     *               - is_virtual: Boolean indicating if the column is virtual (always false in this implementation)
+     */
+    protected function _parseColumnType(array $colType, array $mapTypes = []): array
+    {
+        if ('' === $type = $colType['type'] ?? ($colType['Type'] ?? '')) {
+            return [];
+        }
 
-		$colInfo  = [];
-		$colParts = explode(' ', $type);
+        $colInfo  = [];
+        $colParts = explode(' ', $type);
 
-		if ($fparen = strpos($colParts[0], '(')) {
-			$colInfo['type']       = substr($colParts[0], 0, $fparen);
-			$colInfo['length']     = str_replace(')', '', substr($colParts[0], $fparen + 1));
-			$colInfo['attributes'] = $colParts[1] ?? null;
-		} else {
-			$colInfo['type'] = $colParts[0];
-		}
+        if ($fparen = strpos($colParts[0], '(')) {
+            $colInfo['type']       = substr($colParts[0], 0, $fparen);
+            $colInfo['length']     = str_replace(')', '', substr($colParts[0], $fparen + 1));
+            $colInfo['attributes'] = $colParts[1] ?? null;
+        } else {
+            $colInfo['type'] = $colParts[0];
+        }
 
-		$colInfo['type_sql']   = $type;
-		$colInfo['is_numeric'] = in_array($colInfo['type'], $mapTypes['numerical'], true);
-		$colInfo['is_blob']    = in_array($colInfo['type'], $mapTypes['blob'], true);
-		$colInfo['is_virtual'] = false;
+        $colInfo['type_sql']   = $type;
+        $colInfo['is_numeric'] = in_array($colInfo['type'], $mapTypes['numerical'], true);
+        $colInfo['is_blob']    = in_array($colInfo['type'], $mapTypes['blob'], true);
+        $colInfo['is_virtual'] = false;
 
-		return $colInfo;
-	}
+        return $colInfo;
+    }
 
     /**
      * Get code backup database parameters

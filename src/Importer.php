@@ -40,8 +40,8 @@ class Importer
         };
 
         if (null === $filename = $this->getFile($filename)) {
-			throw Exception::failledToRead(func_get_arg(0));
-		}
+            throw Exception::failledToRead(func_get_arg(0));
+        }
 
         if ($this->option->disable_foreign_keys_check && '' !== $disableForeignKeysCheck = $this->adapter->startDisableForeignKeysCheck()) {
             $this->pdo->exec($disableForeignKeysCheck);
@@ -105,7 +105,7 @@ class Importer
 
         // Remove $dest file if exists
         if (file_exists($dest) && ! unlink($dest)) {
-			return null;
+            return null;
         }
 
         // Open gzipped and destination files in binary mode

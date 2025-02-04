@@ -59,7 +59,7 @@ class Exporter
     /**
      * @var callable
      */
-    private $transformTableRowCallable = null;
+    private $transformTableRowCallable;
 
     /**
      * Keyed on table name, with the value as the conditions.
@@ -85,9 +85,9 @@ class Exporter
         // initiate a transaction at global level to create a consistent snapshot
         if ($this->option->single_transaction) {
             if ('' !== $setupTransaction = $this->adapter->setupTransaction()) {
-				$this->pdo->exec($setupTransaction);
-			}
-			if ('' !== $startTransaction = $this->adapter->startTransaction()) {
+                $this->pdo->exec($setupTransaction);
+            }
+            if ('' !== $startTransaction = $this->adapter->startTransaction()) {
                 $this->pdo->exec($startTransaction);
             }
         }
@@ -171,15 +171,15 @@ class Exporter
         return false;
     }
 
-	/**
-	 * Sets a WHERE condition for a specific table during the export process.
-	 */
-	public function where(string $table, string $condition): self
-	{
-		$this->tableWheres[$table] = $condition;
+    /**
+     * Sets a WHERE condition for a specific table during the export process.
+     */
+    public function where(string $table, string $condition): self
+    {
+        $this->tableWheres[$table] = $condition;
 
-		return $this;
-	}
+        return $this;
+    }
 
     /**
      * Keyed by table name, with the value as the numeric limit:
@@ -211,15 +211,15 @@ class Exporter
         return $limit;
     }
 
-	/**
-	 * Sets a LIMIT condition for a specific table during the export process.
-	 */
-	public function limit(string $table, int $limit): self
-	{
-		$this->tableLimits[$table] = $limit;
+    /**
+     * Sets a LIMIT condition for a specific table during the export process.
+     */
+    public function limit(string $table, int $limit): self
+    {
+        $this->tableLimits[$table] = $limit;
 
-		return $this;
-	}
+        return $this;
+    }
 
     /**
      * Returns header for dump file.
@@ -238,11 +238,11 @@ class Exporter
                     '-- © ' . date('Y') . ' Dimitri Sitchet Tomkeu' . PHP_EOL .
                     '-- https://github.com/dimtrovich/php-db-dumper' . PHP_EOL .
                     '-- ' . PHP_EOL;
-			if ($this->driver !== 'sqlite' ) {
-		$header .=  '-- Host: ' . $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
-			}
-        $header .=  "-- Database: {$this->database}" . PHP_EOL .
-                    '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . ' Driver: ' . $this->driver . PHP_EOL;
+            if ($this->driver !== 'sqlite') {
+                $header .= '-- Host: ' . $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
+            }
+            $header .= "-- Database: {$this->database}" . PHP_EOL .
+                        '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . ' Driver: ' . $this->driver . PHP_EOL;
 
             if (! $this->option->skip_dump_date) {
                 $header .= '-- ' . PHP_EOL . '-- Generated on: ' . date('r') . PHP_EOL;
@@ -545,13 +545,13 @@ class Exporter
         );
         $columns->setFetchMode(PDO::FETCH_ASSOC);
 
-		foreach ($columns as $key => $col) {
-			$field = $col['Field'] ?? ($col['name'] ?? '');
-			if ($field === '') {
-				continue; // skip if field name is empty (MySQL 8.0+ returns empty name for computed columns)
-			}
+        foreach ($columns as $key => $col) {
+            $field = $col['Field'] ?? ($col['name'] ?? '');
+            if ($field === '') {
+                continue; // skip if field name is empty (MySQL 8.0+ returns empty name for computed columns)
+            }
 
-            $types                      = $this->adapter->parseColumnType($col);
+            $types               = $this->adapter->parseColumnType($col);
             $columnTypes[$field] = [
                 'is_numeric' => $types['is_numeric'],
                 'is_blob'    => $types['is_blob'],

@@ -478,7 +478,7 @@ class MysqlAdapter extends Factory
             PHP_EOL;
     }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     public function startDisableForeignKeysCheck(): string
@@ -541,7 +541,7 @@ class MysqlAdapter extends Factory
      */
     public function parseColumnType(array $colType): array
     {
-		$colInfo = parent::_parseColumnType($colType, $this->mysqlTypes);
+        $colInfo = parent::_parseColumnType($colType, $this->mysqlTypes);
         // for virtual columns that are of type 'Extra', column type
         // could by "STORED GENERATED" or "VIRTUAL GENERATED"
         // MySQL reference: https://dev.mysql.com/doc/refman/5.7/en/create-table-generated-columns.html

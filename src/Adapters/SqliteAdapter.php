@@ -15,22 +15,22 @@ use Dimtrovich\DbDumper\Exceptions\Exception;
 
 class SqliteAdapter extends Factory
 {
-	// Numerical SQLITE types
+    // Numerical SQLITE types
     public $sqliteTypes = [
         'numerical' => [
-			'INT',
-			'INTEGER',
-			'TINYINT',
-			'SMALLINT',
-			'MEDIUMINT',
-			'BIGINT',
-			'UNSIGNED BIG INT',
-			'INT2',
-			'INT8',
-			'REAL',
-			'DOUBLE',
-			'DOUBLE PRECISION',
-			'FLOAT',
+            'INT',
+            'INTEGER',
+            'TINYINT',
+            'SMALLINT',
+            'MEDIUMINT',
+            'BIGINT',
+            'UNSIGNED BIG INT',
+            'INT2',
+            'INT8',
+            'REAL',
+            'DOUBLE',
+            'DOUBLE PRECISION',
+            'FLOAT',
             'NUMERIC',
         ],
         'blob' => [
@@ -48,7 +48,7 @@ class SqliteAdapter extends Factory
             "WHERE type='table' AND tbl_name='{$tableName}'";
     }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     public function createTable(array $row): string
@@ -60,7 +60,7 @@ class SqliteAdapter extends Factory
         $createTable = $row['Create Table'];
 
         if ($this->option->reset_auto_increment) {
-            $createTable = 'DELETE FROM sqlite_sequence WHERE name=\'' . $row['Table'] .'\'' . PHP_EOL . $createTable;
+            $createTable = 'DELETE FROM sqlite_sequence WHERE name=\'' . $row['Table'] . '\'' . PHP_EOL . $createTable;
         }
 
         if ($this->option->if_not_exists) {
@@ -128,7 +128,7 @@ class SqliteAdapter extends Factory
         return 'COMMIT';
     }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     public function startDisableForeignKeysCheck(): string
@@ -149,12 +149,10 @@ class SqliteAdapter extends Factory
      */
     public function parseColumnType(array $colType): array
     {
-        $colInfo = parent::_parseColumnType($colType, $this->sqliteTypes);
+        return parent::_parseColumnType($colType, $this->sqliteTypes);
         // for virtual columns that are of type 'Extra', column type
         // could by "STORED GENERATED" or "VIRTUAL GENERATED"
         // MySQL reference: https://dev.mysql.com/doc/refman/5.7/en/create-table-generated-columns.html
         // $colInfo['is_virtual'] = str_contains($colType['Extra'], 'VIRTUAL GENERATED') || str_contains($colType['Extra'], 'STORED GENERATED');
-
-        return $colInfo;
     }
 }
