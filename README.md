@@ -7,7 +7,7 @@
 
 **Db Dumper** est un outils qui vous offre un moyen simple et efficace **d'exporter** et **d'importer** votre base de données en PHP. Il est en quelque sorte une version PHP de l'outil en ligne de commande `mysqldump` qui vient avec MySQL, sans dépendances, avec compression de sortie et des paramètres par défaut raisonnables.
 
-Db Dumper prend en charge la sauvegarde des structures de table, des données elles-mêmes, des vues, des déclencheurs et des événements.
+**Db Dumper** prend en charge la sauvegarde des structures de table, des données elles-mêmes, des vues, des déclencheurs et des événements.
 
 ## Caractéristiques
 
@@ -51,7 +51,7 @@ use PDO;
 $pdo = new PDO('mysql:host=localhost;port=3307;dbname=database', 'username', 'password');
 ```
 
-## Exportation des données (dump)
+## Exportation des données (backup)
 
 L'exportation des données est la fonctionnalité principale de ce package. **Db Dumper** vous offre une API simple pour sauvegarder votre base de données avec les mêmes options offertes par les commandes natives de MySQL ou PostgreSQL (`mysqldump` / `pgrestore`) 
 
@@ -92,8 +92,7 @@ Vous pouvez enregistrer un callable qui sera utilisé pour rapporter la progress
 
 ```php
 $exporter->onTableExport(function($tableName, $rowCount) {
-    echo $tableName . ' exporté';
-    echo $rowCount . ' données';
+    echo "Exportation de la table $tableName avec $rowCount lignes\n";
 });
 ```
 
@@ -164,6 +163,41 @@ Option  | Type | Défaut | Description
 `where` | `string` | `''` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_where)
 </div>
 
+## Importation des données (restore)
+
+Tout comme avec l'exportation des données, **Db Dumper** vous offre une API simple pour restaurer votre base de données à partir d'un fichier de sauvegarde (`.sql`, `.gz`, `.gzip`, `.bz2`, `.bzip2`).
+
+```php
+use Dimtrovich\DbDumper\Importer;
+use Exception;
+
+try {
+    $importer = new Importer($pdo, 'database');
+    
+    $importer->process('storage/work/dump.sql');
+} catch (Exception $e) {
+    echo 'db-dumper error: ' . $e->getMessage();
+}
+```
+
+L'extension du fichier de restauration determine le type de compression à utiliser 
+- `.sql` Pas de compression, c'est un fichier sql clair
+- `.gz`, `.gzip` Compression GZIP, l'importateur décompressera le fichier avant de procéder à la restauration de la base de données. **Vous devez vous rassurer que votre installation de PHP dispose de l'extension `Zlib` avant d'utiliser un dump pareil.**
+- `.bz2`, `.bzip2` Compression BZIP2, l'importateur décompressera le fichier avant de procéder à la restauration de la base de données. **Vous devez vous rassurer que votre installation de PHP dispose de l'extension `Bzlib2` avant d'utiliser un dump pareil.**
+
+### Obtenir des informations sur l'importation des tables
+
+Vous pouvez enregistrer un callable qui sera utilisé pour rapporter la progression de la restauration :
+
+```php
+$importer->onTableCreate(function($tableName) {
+    echo "Création de la table $tableName\n";
+});
+$importer->onTableInsert(function($tableName, $rowCount) {
+    echo "Insertion de $rowCount lignes dans la table $tableName\n";
+});
+```
+
 ## Erreurs
 
 Pour sauvegarder une base de données, vous avez besoin des privilèges suivants :
@@ -181,48 +215,44 @@ Utilisez **SHOW GRANTS FOR user@host;** pour connaître les privilèges de l'uti
 
 [Quels sont les privilèges minimum requis pour obtenir une sauvegarde du schéma d'une base de données MySQL ?](https://dba.stackexchange.com/questions/55546/which-are-the-minimum-privileges-required-to-get-a-backup-of-a-mysql-database-sc/55572#55572)
 
+Pour restaurer une base de données, vous avez besoin des privilèges suivants :
+
+- **ALTER**
+  - Nécessaire si votre fichier de sauvegarde contient des instructions de modification de tables.
+- **CREATE**
+  - Nécessaire si votre fichier de sauvegarde contient des instructions de création de tables.
+- **CREATE ROUTINE**
+  - Nécessaire si votre fichier de sauvegarde contient des instructions de création de routines.
+- **CREATE VIEW**
+  - Nécessaire si votre fichier de sauvegarde contient des instructions de création de vues.
+- **DELETE**
+  - Nécessaire si votre fichier de sauvegarde contient des instructions de suppression de données.
+- **DROP**
+  - Nécessaire si votre fichier de sauvegarde contient des instructions de suppression de tables ou de vues.
+- **INSERT**
+  - Nécessaire si votre fichier de sauvegarde contient des instructions d'insertion de données dans des tables.
+- **UPDATE**
+  - Nécessaire si votre fichier de sauvegarde contient des instructions de modification de données dans des tables.
+
 ## Tests
 
-Le code actuel pour les tests est un hack peu élégant. Il y a probablement de bien meilleures façons de les réaliser en utilisant PHPUnit, donc les PR sont les bienvenues. Le script de test crée et peuple une base de données en utilisant tous les types de données possibles. Ensuite, il l'exporte en utilisant à la fois `mysqldump-php` et `mysqldump`, et compare les sorties. Les tests sont OK uniquement si elles sont identiques. Après [ce commit](https://github.com/ifsnop/mysqldump-php/commit/8496fbb1b26dde404804bc8865ec32044da5b813), certains tests sont effectués en utilisant PHPUnit.
-
-Certains tests sont ignorés si le serveur MySQL ne les supporte pas.
-
-Quelques tests comparent uniquement entre le code SQL original et le code SQL généré par `mysqldump-php`, car certaines options ne sont pas disponibles dans `mysqldump`.
-
-## Bugs (de mysqldump, pas de mysqldump-php)
-
-Après [ce rapport de bug](https://bugs.mysql.com/bug.php?id=80150), un nouveau bug a été introduit. `_binary` est également ajouté lorsque l'option `hex-blob` est utilisée, si la valeur est vide.
+Les tests unitaires de ce package sont écrits avec la bibliothèque Kahlan. Les tests prennent en compte SQLite, les tests pour MySQL n'ont pas été écrit mais des tests ont été fait dans un environnement réel. Les PR allant dans ce sens sont les bienvenues. 
 
 ## Todo
 
-Écrire plus de tests, tester avec MariaDB également.
+- Écrire plus de tests, tester avec MariaDB également.
+- Prise en compte des autres pilotes base de données (PostgreSQL, Oracle, MS Server, MongoDB)
 
 ## Contribution
 
 Veuillez consulter [CONTRIBUTING](CONTRIBUTING.md) pour plus de détails.
 
-## Failles de sécurité
-
-Veuillez consulter [notre politique de sécurité](../../security/policy) pour savoir comment signaler les vulnérabilités de sécurité.
-
-## Credits
-
-- [Dimitri Sitchet Tomkeu](https://github.com/dimtrovich)
-- [Tous les Contributeurs](../../contributors)
-
 ## Licence
 
-Ce projet est un logiciel open-source sous licence [MIT](MIT). Veuillez consulter [Fichier de licence](LICENSE.md) pour plus d'informations.
+Ce projet est un logiciel open-source sous licence [MIT](https://opensource.org/license/MIT). Veuillez consulter [Fichier de licence](LICENSE.md) pour plus d'informations.
 
 ## Crédits
 
-Après plus de 8 ans, il reste à peine quelque chose du code source original, mais :
+Bien qu'étant totalement modifié, le code de l'exportateur de **DB Dumper** a été inspiré de [MySQLDump - PHP](https://github.com/ifsnop/mysqldump-php) maintenu par [Diego Torres](https://github.com/ifsnop). Nous tenons donc à le remercier
 
-À l'origine basé sur le script de James Elliott de 2009.
-https://code.google.com/archive/p/db-mysqldump/
-
-Adapté et étendu par Michael J. Calkins.
-https://github.com/clouddueling
-
-Actuellement maintenu, développé et amélioré par Diego Torres.
-https://github.com/ifsnop
+Ceci étant dit, notons que ce package a été crée par [Dimitri Sitchet Tomkeu](https://github.com/dimtrovich) et est maintenu par [Tous les Contributeurs](../../contributors).
