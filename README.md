@@ -2,9 +2,20 @@ EN | [FR](README-fr.md)
 
 # Backup and restore database content
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/dimtrovich/db-dumper.svg?style=flat-square)](https://packagist.org/packages/dimtrovich/db-dumper)
-[![Tests](https://img.shields.io/github/actions/workflow/status/dimtrovich/php-db-dumper/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/dimtrovich/php-db-dumper/actions/workflows/run-tests.yml)
-[![Total Downloads](https://img.shields.io/packagist/dt/dimtrovich/db-dumper.svg?style=flat-square)](https://packagist.org/packages/dimtrovich/db-dumper)
+[![Tests](https://github.com/dimtrovich/php-db-dumper/actions/workflows/run-tests.yml/badge.svg)](https://github.com/dimtrovich/php-db-dumper/actions/workflows/run-tests.yml)
+[![Code Coverage](https://scrutinizer-ci.com/g/dimtrovich/php-db-dumper/badges/coverage.png?b=main)](https://scrutinizer-ci.com/g/dimtrovich/php-db-dumper/?branch=main)
+[![Coding Standards](https://github.com/dimtrovich/php-db-dumper/actions/workflows/test-coding-standards.yml/badge.svg)](https://github.com/dimtrovich/php-db-dumper/actions/workflows/test-coding-standards.yml)
+[![Build Status](https://scrutinizer-ci.com/g/dimtrovich/php-db-dumper/badges/build.png?b=main)](https://scrutinizer-ci.com/g/dimtrovich/php-db-dumper/build-status/main)
+[![Code Intelligence Status](https://scrutinizer-ci.com/g/dimtrovich/php-db-dumper/badges/code-intelligence.svg?b=main)](https://scrutinizer-ci.com/code-intelligence)
+[![Quality Score](https://img.shields.io/scrutinizer/g/dimtrovich/php-db-dumper.svg?style=flat-square)](https://scrutinizer-ci.com/g/dimtrovich/php-db-dumper)
+[![PHPStan](https://github.com/dimtrovich/php-db-dumper/actions/workflows/test-phpstan.yml/badge.svg)](https://github.com/dimtrovich/php-db-dumper/actions/workflows/test-phpstan.yml)
+[![PHPStan level](https://img.shields.io/badge/PHPStan-level%206-brightgreen)](phpstan.neon.dist)
+[![Total Downloads](https://poser.pugx.org/dimtrovich/db-dumper/downloads)](https://packagist.org/packages/dimtrovich/db-dumper)
+[![Latest Version](https://img.shields.io/packagist/v/dimtrovich/db-dumper.svg?style=flat-square)](https://packagist.org/packages/dimtrovich/db-dumper)
+![PHP](https://img.shields.io/badge/PHP->=7.4-blue)
+[![Software License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+<br>
 
 **Db Dumper** is a tool that offers you a simple and efficient way to **export** and **import** your database in PHP. It is somewhat of a PHP version of the command-line tool `mysqldump` that comes with MySQL, without dependencies, with output compression and reasonable default parameters.
 
