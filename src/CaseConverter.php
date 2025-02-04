@@ -47,6 +47,10 @@ abstract class CaseConverter
 			$value = strtolower(preg_replace('/(.)(?=[A-Z])/u', '$1_', $value));
 		}
 
+		if ($value === $key) {
+			$value = str_replace(['-', '.'], '_', $value); // hack for kebab case and dot annotation
+		}
+
 		return static::$snakeCache[$key] = $value;
 	}
 }
