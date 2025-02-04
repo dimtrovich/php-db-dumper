@@ -35,7 +35,7 @@ class ReflectionHelper
      *
      * @throws ReflectionException If the method does not exist or is not accessible
      */
-    public static function getPrivateMethodInvoker(object|string $obj, string $method): Closure
+    public static function getPrivateMethodInvoker($obj, string $method): Closure
     {
         $refMethod = new ReflectionMethod($obj, $method);
         $refMethod->setAccessible(true);
@@ -57,7 +57,7 @@ class ReflectionHelper
      *
      * @throws ReflectionException If the property does not exist
      */
-    public static function getAccessibleRefProperty(object|string $obj, string $property): ReflectionProperty
+    public static function getAccessibleRefProperty($obj, string $property): ReflectionProperty
     {
         $refClass = is_object($obj) ? new ReflectionObject($obj) : new ReflectionClass($obj);
 
@@ -76,7 +76,7 @@ class ReflectionHelper
      *
      * @throws ReflectionException If the property does not exist or is not accessible
      */
-    public static function setPrivateProperty(object|string $obj, string $property, mixed $value): void
+    public static function setPrivateProperty($obj, string $property, mixed $value): void
     {
         $refProperty = self::getAccessibleRefProperty($obj, $property);
 
@@ -95,7 +95,7 @@ class ReflectionHelper
      *
      * @return mixed The value of the private property
      */
-    public static function getPrivateProperty(object|string $obj, string $property): mixed
+    public static function getPrivateProperty($obj, string $property): mixed
     {
         $refProperty = self::getAccessibleRefProperty($obj, $property);
 

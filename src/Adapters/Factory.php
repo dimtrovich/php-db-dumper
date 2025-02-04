@@ -17,16 +17,30 @@ use PDO;
 
 abstract class Factory
 {
-    public function __construct(protected PDO $pdo, protected Option $option)
+    /**
+     * Database connection PDO instance
+     */
+    protected PDO $pdo;
+
+    /**
+     * Option instance
+     */
+    protected Option $option;
+
+    public function __construct(PDO $pdo, Option $option)
     {
+        $this->pdo    = $pdo;
+        $this->option = $option;
     }
 
     /**
      * Create an instance of compressor
      *
      * @internal
+     *
+     * @return static
      */
-    public static function create(PDO $pdo, Option $option): static
+    public static function create(PDO $pdo, Option $option)
     {
         $type = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
