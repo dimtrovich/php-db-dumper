@@ -1,34 +1,35 @@
-# Sauvegarde et restaure le contenu d'une base de données
+EN | [FR](README-fr.md)
+
+# Backup and restore database content
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/dimtrovich/db-dumper.svg?style=flat-square)](https://packagist.org/packages/dimtrovich/db-dumper)
 [![Tests](https://img.shields.io/github/actions/workflow/status/dimtrovich/php-db-dumper/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/dimtrovich/php-db-dumper/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/dimtrovich/db-dumper.svg?style=flat-square)](https://packagist.org/packages/dimtrovich/db-dumper)
 
+**Db Dumper** is a tool that offers you a simple and efficient way to **export** and **import** your database in PHP. It is somewhat of a PHP version of the command-line tool `mysqldump` that comes with MySQL, without dependencies, with output compression and reasonable default parameters.
 
-**Db Dumper** est un outils qui vous offre un moyen simple et efficace **d'exporter** et **d'importer** votre base de données en PHP. Il est en quelque sorte une version PHP de l'outil en ligne de commande `mysqldump` qui vient avec MySQL, sans dépendances, avec compression de sortie et des paramètres par défaut raisonnables.
+**Db Dumper** supports backing up table structures, the data itself, views, triggers, and events.
 
-**Db Dumper** prend en charge la sauvegarde des structures de table, des données elles-mêmes, des vues, des déclencheurs et des événements.
+## Features
 
-## Caractéristiques
+Db Dumper supports:
+* outputting binary blobs in hexadecimal form.
+* resolving view dependencies (using substitute tables).
+* backing up stored routines (functions and procedures).
+* backing up events.
+* extended and/or complete insertion.
+* MySQL 5.7 virtual columns.
+* `insert-ignore`, like a `REPLACE` but ignoring errors if a duplicate key exists.
+* modifying database data on the fly during backup, using `hooks`.
+* direct backup to Google Cloud storage via a compressed stream wrapper (GZIPSTREAM).
 
-Db Dumper prend en charge :
-* la sortie des blobs binaires sous forme hexadécimale.
-* la résolution des dépendances des vues (en utilisant des tables de substitution).
-* la sauvegarde des routines stockées (fonctions et procédures).
-* la sauvegarde des événements.
-* l'insertion étendue et/ou complète.
-* les colonnes virtuelles de MySQL 5.7.
-* l'`insert-ignore`, comme un `REPLACE` mais en ignorant les erreurs si une clé en double existe.
-* la modification des données de la base de données à la volée lors de la sauvegarde, en utilisant des `hooks`.
-* la sauvegarde directe vers le stockage Google Cloud via un wrapper de flux compressé (GZIPSTREAM).
+Db Dumper is designed to work with the main current database management systems. The list below outlines their support:
+* MySQL (supported)
+* SQLite (supported)
+* PostgreSQL (in progress)
+* Oracle (not supported)
 
-Db Dumper est conçu pour fonctionner avec les principaux système de gestion de base de données actuels. La liste ci-dessous dresse un état de leurs prise en charge :
-* MySQL (supporté)
-* SQLite (supporté)
-* PostgreSQL (en cours d'implémentation)
-* Oracle (pas supporté)
-
-## Pré-requis
+## Prerequisites
 
 - PHP 7.4+
 - *MySQL 5+
@@ -37,13 +38,13 @@ Db Dumper est conçu pour fonctionner avec les principaux système de gestion de
 
 ## Installation
 
-En utilisant [Composer](https://getcomposer.org/) :
+Using [Composer](https://getcomposer.org/):
 
 ```
 $ composer require dimtrovich/db-dumper
 ```
 
-Après avoir installer ce package, vous devez au préalable vous assurez d'avoir accès à une instance `PDO` car les systèmes d'exportation et d'importation en n'ont besoin.
+After installing this package, you must first ensure that you have access to a `PDO` instance as the export and import systems need it.
 
 ```php
 use PDO;
@@ -51,9 +52,9 @@ use PDO;
 $pdo = new PDO('mysql:host=localhost;port=3307;dbname=database', 'username', 'password');
 ```
 
-## Exportation des données (backup)
+## Data Export (backup)
 
-L'exportation des données est la fonctionnalité principale de ce package. **Db Dumper** vous offre une API simple pour sauvegarder votre base de données avec les mêmes options offertes par les commandes natives de MySQL ou PostgreSQL (`mysqldump` / `pgrestore`) 
+Data export is the main functionality of this package. **Db Dumper** offers you a simple API to backup your database with the same options offered by native MySQL or PostgreSQL commands (`mysqldump` / `pgrestore`)
 
 ```php
 use Dimtrovich\DbDumper\Exporter;
@@ -68,9 +69,9 @@ try {
 }
 ```
 
-### Modification des valeurs lors de l'exportation
+### Modifying values during export
 
-Vous pouvez enregistrer un callable qui sera utilisé pour transformer les valeurs lors de l'exportation. Un cas d'utilisation typique est la suppression de données sensibles des sauvegardes de base de données :
+You can register a callable that will be used to transform values during export. A typical use case is removing sensitive data from database backups:
 
 ```php
 $exporter = new Exporter($pdo, 'database');
@@ -86,19 +87,19 @@ $exporter->transformTableRow(function (string $tableName, array $row) {
 $exporter->process('storage/work/dump.sql');
 ```
 
-### Obtenir des informations sur l'exportation des tables
+### Getting information about table export
 
-Vous pouvez enregistrer un callable qui sera utilisé pour rapporter la progression de la sauvegarde :
+You can register a callable that will be used to report the progress of the backup:
 
 ```php
 $exporter->onTableExport(function($tableName, $rowCount) {
-    echo "Exportation de la table $tableName avec $rowCount lignes\n";
+    echo "Exporting table $tableName with $rowCount rows\n";
 });
 ```
 
-### Conditions d'exportation spécifiques à une table
+### Table-specific export conditions
 
-Vous pouvez définir des clauses `WHERE` spécifiques à une table pour limiter les données des tables qui pourront être exportées. Ces clauses remplacent le paramètre `where` par défaut :
+You can define table-specific `WHERE` clauses to limit the data of tables that can be exported. These clauses override the default `where` parameter:
 
 ```php
 $exporter->setTableWheres([
@@ -108,9 +109,9 @@ $exporter->setTableWheres([
 ]);
 ```
 
-### Limites d'exportation spécifiques à une table
+### Table-specific export limits
 
-Vous pouvez également définir des limites spécifiques à une table pour limiter le nombre d'enregistrement qui seront sauvegardés par chaque table :
+You can also define table-specific limits to limit the number of records that will be saved for each table:
 
 ```php
 $exporter->setTableLimits([
@@ -120,52 +121,52 @@ $exporter->setTableLimits([
 ]);
 ```
 
-### Options de configuration de l'exportateur
+### Exporter configuration options
 
-Le constructeur de la classe `Exporter` accepte un troisième paramètre qui est un tableau désignant les options d'exportation des données.  
+The constructor of the `Exporter` class accepts a third parameter which is an array designating the data export options.
 
 <div class="overflow-auto">
 
-Option  | Type | Défaut | Description
+Option  | Type | Default | Description
 ------- | ------- | ------- | -------
-`include-tables` | `array` | `[]` | Inclure uniquement ces tables (tableau de noms de tables), inclure toutes si vide.  
-`exclude-tables` | `array` | `[]` | Exclure ces tables (tableau de noms de tables), inclure toutes si vide, supporte les expressions régulières.    
-`include-views` | `array` | `[]` | Inclure uniquement ces vues (tableau de noms de vues), inclure toutes si vide. Par défaut, toutes les vues nommées dans le tableau `include-tables` sont incluses.
+`include-tables` | `array` | `[]` | Include only these tables (array of table names), include all if empty.
+`exclude-tables` | `array` | `[]` | Exclude these tables (array of table names), include all if empty, supports regular expressions.
+`include-views` | `array` | `[]` | Include only these views (array of view names), include all if empty. By default, all views named in the `include-tables` array are included.
 `compress` | `Gzip`, `Bzip2`, `None`, `GzipStream` | `None` |   
 `init_commands` | `array` | `[]` |   
-`no-data` | `array` | `[]` | Ne pas sauvegarder les données pour ces tables (tableau de noms de tables), supporte les expressions régulières.
-`if-not-exists` | `bool` | `false` | Créer une nouvelle table uniquement si une table du même nom n'existe pas déjà. Aucun message d'erreur n'est généré si la table existe déjà.  
-`reset-auto-increment` | `bool` | `false` | Supprime l'option `AUTO_INCREMENT` de la définition de la base de données. Utile lorsqu'il est utilisé avec `no-data`, de sorte que lorsque la base de données est recréée, elle commence à 1 au lieu d'utiliser une ancienne valeur.  
-`add-drop-database` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_add-drop-database)  
-`add-drop-table` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_add-drop-table)  
-`add-drop-trigger` | `bool` | `true` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_add-drop-trigger)
-`add-locks` | `bool` | `true` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_add-locks)
-`complete-insert` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_complete-insert)  
-`databases` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_databases)  
+`no-data` | `array` | `[]` | Do not save data for these tables (array of table names), supports regular expressions.
+`if-not-exists` | `bool` | `false` | Create a new table only if a table of the same name does not already exist. No error message is generated if the table already exists.
+`reset-auto-increment` | `bool` | `false` | Removes the `AUTO_INCREMENT` option from the database definition. Useful when used with `no-data`, so that when the database is recreated, it starts at 1 instead of using an old value.
+`add-drop-database` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_add-drop-database)
+`add-drop-table` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_add-drop-table)
+`add-drop-trigger` | `bool` | `true` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_add-drop-trigger)
+`add-locks` | `bool` | `true` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_add-locks)
+`complete-insert` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_complete-insert)
+`databases` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_databases)
 `default-character-set` | `utf8`, `utf8mb4`, `binary` | `utf8` |   
-`disable-keys` | `bool` | `true` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_disable-keys)    
-`extended-insert` | `bool` | `true` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_extended-insert)
-`events` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.7/en/mysqldump.html#option_mysqldump_events) 
-`hex-blob` | `bool` | `true` | (Plus rapide que le contenu échappé). [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_hex-blob)
-`insert-ignore` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.7/en/mysqldump.html#option_mysqldump_insert-ignore)
-`lock-tables` | `bool` | `true` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_lock-tables)
-`net_buffer_length` | `int` | `1000000` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.7/en/mysqldump.html#option_mysqldump_net_buffer_length)
-`no-autocommit` | `bool` | `true` | Option pour désactiver l'autocommit (insertions plus rapides, pas de problèmes avec les clés d'index). [Documentation MySQL](https://dev.mysql.com/doc/refman/4.1/en/commit.html)
-`no-create-db` | `bool` | `false` | Option pour désactiver la sauvegarde des instructions de création de base de données. [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_no-create-db)
-`no-create-info` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_no-create-info)
-`routines` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_routines)
-`single-transaction` | `bool` | `true` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_single-transaction)
-`skip-triggers` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_triggers)
-`skip-tz-utc` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_tz-utc)  
-`skip-comments` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_comments)  
-`skip-dump-date` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_dump-date)
-`skip-definer` | `bool` | `false` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.7/en/mysqlpump.html#option_mysqlpump_skip-definer)  
-`where` | `string` | `''` | [Documentation MySQL](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_where)
+`disable-keys` | `bool` | `true` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_disable-keys)
+`extended-insert` | `bool` | `true` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_extended-insert)
+`events` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.7/en/mysqldump.html#option_mysqldump_events)
+`hex-blob` | `bool` | `true` | (Faster than escaped content). [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_hex-blob)
+`insert-ignore` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.7/en/mysqldump.html#option_mysqldump_insert-ignore)
+`lock-tables` | `bool` | `true` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_lock-tables)
+`net_buffer_length` | `int` | `1000000` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.7/en/mysqldump.html#option_mysqldump_net_buffer_length)
+`no-autocommit` | `bool` | `true` | Option to disable autocommit (faster inserts, no problems with index keys). [MySQL Documentation](https://dev.mysql.com/doc/refman/4.1/en/commit.html)
+`no-create-db` | `bool` | `false` | Option to disable backing up database creation instructions. [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_no-create-db)
+`no-create-info` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_no-create-info)
+`routines` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_routines)
+`single-transaction` | `bool` | `true` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_single-transaction)
+`skip-triggers` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_triggers)
+`skip-tz-utc` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_tz-utc)
+`skip-comments` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_comments)
+`skip-dump-date` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_dump-date)
+`skip-definer` | `bool` | `false` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.7/en/mysqlpump.html#option_mysqlpump_skip-definer)
+`where` | `string` | `''` | [MySQL Documentation](https://dev.mysql.com/doc/refman/5.1/en/mysqldump.html#option_mysqldump_where)
 </div>
 
-## Importation des données (restore)
+## Data Import (Restore)
 
-Tout comme avec l'exportation des données, **Db Dumper** vous offre une API simple pour restaurer votre base de données à partir d'un fichier de sauvegarde (`.sql`, `.gz`, `.gzip`, `.bz2`, `.bzip2`).
+Just like with data export, **Db Dumper** provides you with a simple API to restore your database from a backup file (`.sql`, `.gz`, `.gzip`, `.bz2`, `.bzip2`).
 
 ```php
 use Dimtrovich\DbDumper\Importer;
@@ -180,79 +181,79 @@ try {
 }
 ```
 
-L'extension du fichier de restauration determine le type de compression à utiliser 
-- `.sql` Pas de compression, c'est un fichier sql clair
-- `.gz`, `.gzip` Compression GZIP, l'importateur décompressera le fichier avant de procéder à la restauration de la base de données. **Vous devez vous rassurer que votre installation de PHP dispose de l'extension `Zlib` avant d'utiliser un dump pareil.**
-- `.bz2`, `.bzip2` Compression BZIP2, l'importateur décompressera le fichier avant de procéder à la restauration de la base de données. **Vous devez vous rassurer que votre installation de PHP dispose de l'extension `Bzlib2` avant d'utiliser un dump pareil.**
+The file extension of the restore file determines the type of compression to use:
+- `.sql` No compression, it's a plain SQL file.
+- `.gz`, `.gzip` GZIP compression, the importer will decompress the file before proceeding with the database restoration. **Make sure your PHP installation has the `Zlib` extension enabled before using such a dump.**
+- `.bz2`, `.bzip2` BZIP2 compression, the importer will decompress the file before proceeding with the database restoration. **Make sure your PHP installation has the `Bzlib2` extension enabled before using such a dump.**
 
-### Obtenir des informations sur l'importation des tables
+### Get Information on Table Import
 
-Vous pouvez enregistrer un callable qui sera utilisé pour rapporter la progression de la restauration :
+You can register a callable that will be used to report the progress of the restoration:
 
 ```php
 $importer->onTableCreate(function($tableName) {
-    echo "Création de la table $tableName\n";
+    echo "Creating table $tableName\n";
 });
 $importer->onTableInsert(function($tableName, $rowCount) {
-    echo "Insertion de $rowCount lignes dans la table $tableName\n";
+    echo "Inserting $rowCount rows into table $tableName\n";
 });
 ```
 
-## Erreurs
+## Errors
 
-Pour sauvegarder une base de données, vous avez besoin des privilèges suivants :
+To back up a database, you need the following privileges:
 
 - **SELECT**
-  - Pour sauvegarder les structures de table et les données.
+  - To back up table structures and data.
 - **SHOW VIEW**
-  - Si une base de données contient des vues, sinon vous obtiendrez une erreur.
+  - If a database contains views, otherwise you will get an error.
 - **TRIGGER**
-  - Si une table contient un ou plusieurs déclencheurs.
+  - If a table contains one or more triggers.
 - **LOCK TABLES**
-  - Si l'option "lock tables" est activée.
+  - If the "lock tables" option is enabled.
 
-Utilisez **SHOW GRANTS FOR user@host;** pour connaître les privilèges de l'utilisateur. Voir le lien suivant pour plus d'informations :
+Use **SHOW GRANTS FOR user@host;** to check the user's privileges. See the following link for more information:
 
-[Quels sont les privilèges minimum requis pour obtenir une sauvegarde du schéma d'une base de données MySQL ?](https://dba.stackexchange.com/questions/55546/which-are-the-minimum-privileges-required-to-get-a-backup-of-a-mysql-database-sc/55572#55572)
+[What are the minimum privileges required to get a backup of a MySQL database schema?](https://dba.stackexchange.com/questions/55546/which-are-the-minimum-privileges-required-to-get-a-backup-of-a-mysql-database-sc/55572#55572)
 
-Pour restaurer une base de données, vous avez besoin des privilèges suivants :
+To restore a database, you need the following privileges:
 
 - **ALTER**
-  - Nécessaire si votre fichier de sauvegarde contient des instructions de modification de tables.
+  - Required if your backup file contains table alteration instructions.
 - **CREATE**
-  - Nécessaire si votre fichier de sauvegarde contient des instructions de création de tables.
+  - Required if your backup file contains table creation instructions.
 - **CREATE ROUTINE**
-  - Nécessaire si votre fichier de sauvegarde contient des instructions de création de routines.
+  - Required if your backup file contains routine creation instructions.
 - **CREATE VIEW**
-  - Nécessaire si votre fichier de sauvegarde contient des instructions de création de vues.
+  - Required if your backup file contains view creation instructions.
 - **DELETE**
-  - Nécessaire si votre fichier de sauvegarde contient des instructions de suppression de données.
+  - Required if your backup file contains data deletion instructions.
 - **DROP**
-  - Nécessaire si votre fichier de sauvegarde contient des instructions de suppression de tables ou de vues.
+  - Required if your backup file contains table or view deletion instructions.
 - **INSERT**
-  - Nécessaire si votre fichier de sauvegarde contient des instructions d'insertion de données dans des tables.
+  - Required if your backup file contains data insertion instructions into tables.
 - **UPDATE**
-  - Nécessaire si votre fichier de sauvegarde contient des instructions de modification de données dans des tables.
+  - Required if your backup file contains data modification instructions in tables.
 
 ## Tests
 
-Les tests unitaires de ce package sont écrits avec la bibliothèque Kahlan. Les tests prennent en compte SQLite, les tests pour MySQL n'ont pas été écrit mais des tests ont été fait dans un environnement réel. Les PR allant dans ce sens sont les bienvenues. 
+The unit tests for this package are written using the Kahlan library. The tests cover SQLite, but tests for MySQL have not been written, although tests have been conducted in a real environment. PRs in this direction are welcome.
 
 ## Todo
 
-- Écrire plus de tests, tester avec MariaDB également.
-- Prise en compte des autres pilotes base de données (PostgreSQL, Oracle, MS Server, MongoDB)
+- Write more tests, also test with MariaDB.
+- Support for other database drivers (PostgreSQL, Oracle, MS Server, MongoDB).
 
 ## Contribution
 
-Veuillez consulter [CONTRIBUTING](CONTRIBUTING.md) pour plus de détails.
+Please see [CONTRIBUTING](CONTRIBUTING.md) for more details.
 
-## Licence
+## License
 
-Ce projet est un logiciel open-source sous licence [MIT](https://opensource.org/license/MIT). Veuillez consulter [Fichier de licence](LICENSE.md) pour plus d'informations.
+This project is open-source software licensed under the [MIT](https://opensource.org/license/MIT) license. Please see the [License File](LICENSE.md) for more information.
 
-## Crédits
+## Credits
 
-Bien qu'étant totalement modifié, le code de l'exportateur de **DB Dumper** a été inspiré de [MySQLDump - PHP](https://github.com/ifsnop/mysqldump-php) maintenu par [Diego Torres](https://github.com/ifsnop). Nous tenons donc à le remercier
+Although significantly modified, the code for **DB Dumper**'s exporter was inspired by [MySQLDump - PHP](https://github.com/ifsnop/mysqldump-php) maintained by [Diego Torres](https://github.com/ifsnop). We would like to thank him.
 
-Ceci étant dit, notons que ce package a été crée par [Dimitri Sitchet Tomkeu](https://github.com/dimtrovich) et est maintenu par [Tous les Contributeurs](../../contributors).
+That said, note that this package was created by [Dimitri Sitchet Tomkeu](https://github.com/dimtrovich) and is maintained by [All Contributors](../../contributors).
