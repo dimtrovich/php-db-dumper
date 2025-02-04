@@ -32,12 +32,24 @@ class Importer
     {
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
-        $this->compressor = match ($extension) {
-            'gz' , 'gzip' => CompressorFactory::create(Option::COMPRESSION_GZIP),
-            'bz2', 'bzip2' => CompressorFactory::create(Option::COMPRESSION_BZIP2),
-            'sql'   => CompressorFactory::create(Option::COMPRESSION_NONE),
-            default => throw Exception::unavailableDriverForcompression($extension),
-        };
+        switch ($extension) {
+            case 'gz':
+            case 'gzip':
+                $this->compressor = CompressorFactory::create(Option::COMPRESSION_GZIP);
+                break;
+
+            case 'bz2':
+            case 'bzip2':
+                $this->compressor = CompressorFactory::create(Option::COMPRESSION_BZIP2);
+                break;
+
+            case 'sql':
+                $this->compressor = CompressorFactory::create(Option::COMPRESSION_NONE);
+                break;
+
+            default:
+                throw Exception::unavailableDriverForcompression($extension);
+        }
 
         if (null === $filename = $this->getFile($filename)) {
             throw Exception::failledToRead(func_get_arg(0));

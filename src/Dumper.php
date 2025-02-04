@@ -39,12 +39,24 @@ trait Dumper
     private Event $event;
 
     /**
+     * Database connection PDO instance
+     */
+    private PDO $pdo;
+
+    /**
      * Database driver
      */
     private string $driver;
 
-    public function __construct(private string $database, private PDO $pdo, array $options = [])
+    /**
+     * Database name
+     */
+    private string $database;
+
+    public function __construct(string $database, PDO $pdo, array $options = [])
     {
+        $this->database   = $database;
+        $this->pdo        = $pdo;
         $this->option     = new Option($options, $this->driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
         $this->event      = new Event();
         $this->compressor = CompressorFactory::create($this->option->compress);
@@ -73,8 +85,12 @@ trait Dumper
 
     /**
      * Set Dumper configurations option
+     *
+     * @param array|Option $option
+     *
+     * @return static
      */
-    public function setOption(array|Option $option): static
+    public function setOption($option)
     {
         if ($option instanceof Option) {
             $this->option = $option;
