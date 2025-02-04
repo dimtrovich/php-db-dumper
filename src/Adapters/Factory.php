@@ -58,7 +58,7 @@ abstract class Factory
     /**
      * Add sql to create and use database
      */
-    public function databases(): string
+    public function databases(string $databaseName): string
     {
         return '';
     }
@@ -156,27 +156,27 @@ abstract class Factory
     /**
      * Get code to list tables of database
      */
-    abstract public function showTables(): string;
+    abstract public function showTables(string $database): string;
 
     /**
      * Get code to list views of database
      */
-    abstract public function showViews(): string;
+    abstract public function showViews(string $database): string;
 
     /**
      * Get code to list triggers of database
      */
-    abstract public function showTriggers(): string;
+    abstract public function showTriggers(string $database): string;
 
     /**
      * Get code to list columns of table
      */
-    abstract public function showColumns(): string;
+    abstract public function showColumns(string $table): string;
 
     /**
      * Get code to list procedures of database
      */
-    public function showProcedures(): string
+    public function showProcedures(string $database): string
     {
         return '';
     }
@@ -184,7 +184,7 @@ abstract class Factory
     /**
      * Get code to list functions of database
      */
-    public function showFunctions(): string
+    public function showFunctions(string $database): string
     {
         return '';
     }
@@ -192,7 +192,7 @@ abstract class Factory
     /**
      * Get code to list events of database
      */
-    public function showEvents(): string
+    public function showEvents(string $database): string
     {
         return '';
     }
@@ -217,16 +217,20 @@ abstract class Factory
 
     /**
      * Perform lock table
+	 *
+	 * @return false|int
      */
-    public function lockTable(): false|int
+    public function lockTable(string $table)
     {
         return false;
     }
 
     /**
      * Perform unlock table
+	 *
+	 * @return false|int
      */
-    public function unlockTable(): false|int
+    public function unlockTable(string $table)
     {
         return false;
     }
@@ -234,7 +238,7 @@ abstract class Factory
     /**
      * Get code to start lock table operation
      */
-    public function startAddLockTable(): string
+    public function startAddLockTable(string $table): string
     {
         return PHP_EOL;
     }
@@ -242,7 +246,7 @@ abstract class Factory
     /**
      * Get code to finish lock table operation
      */
-    public function endAddLockTable(): string
+    public function endAddLockTable(string $table): string
     {
         return PHP_EOL;
     }
@@ -250,7 +254,7 @@ abstract class Factory
     /**
      * Get code to start disabled keys operation
      */
-    public function startAddDisableKeys(): string
+    public function startAddDisableKeys(string $table): string
     {
         return PHP_EOL;
     }
@@ -258,7 +262,7 @@ abstract class Factory
     /**
      * Get code to finish disabled keys operation
      */
-    public function endAddDisableKeys(): string
+    public function endAddDisableKeys(string $table): string
     {
         return PHP_EOL;
     }
@@ -298,7 +302,7 @@ abstract class Factory
     /**
      * Get code to drop database
      */
-    public function addDropDatabase(): string
+    public function addDropDatabase(string $database): string
     {
         return PHP_EOL;
     }
@@ -306,7 +310,7 @@ abstract class Factory
     /**
      * Get code to drop trigger
      */
-    public function addDropTrigger(): string
+    public function addDropTrigger(string $trigger): string
     {
         return PHP_EOL;
     }
@@ -325,7 +329,7 @@ abstract class Factory
     /**
      * Get code to drop view
      */
-    public function dropView(): string
+    public function dropView(string $view): string
     {
         return PHP_EOL;
     }

@@ -83,7 +83,7 @@ class SqliteAdapter extends Factory
     /**
      * {@inheritDoc}
      */
-    public function showTables(): string
+    public function showTables(string $database = ''): string
     {
         return "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name NOT LIKE 'sqlite_%'";
     }
@@ -91,7 +91,7 @@ class SqliteAdapter extends Factory
     /**
      * {@inheritDoc}
      */
-    public function showViews(): string
+    public function showViews(string $database = ''): string
     {
         return "SELECT tbl_name FROM sqlite_master WHERE type='view' AND tbl_name NOT LIKE 'sqlite_%'";
     }
@@ -99,24 +99,16 @@ class SqliteAdapter extends Factory
     /**
      * {@inheritDoc}
      */
-    public function showTriggers(): string
+    public function showTriggers(string $database = ''): string
     {
         return "SELECT name FROM sqlite_master WHERE type='trigger' AND tbl_name NOT LIKE 'sqlite_%'";
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $table
      */
-    public function showColumns(): string
+    public function showColumns(string $table): string
     {
-        if (func_num_args() !== 1) {
-            return '';
-        }
-
-        $table = func_get_arg(0);
-
         return "pragma table_info({$table})";
     }
 

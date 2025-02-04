@@ -59,7 +59,7 @@ class Exporter
     /**
      * @var callable
      */
-    private $transformTableRowCallable;
+    private $transformTableRowCallable = null;
 
     /**
      * Keyed on table name, with the value as the conditions.
@@ -346,10 +346,8 @@ class Exporter
     /**
      * Reads procedure names from database.
      * Fills $this->tables array so they will be dumped later.
-     *
-     * @return null
      */
-    private function getDatabaseStructureProcedures()
+    private function getDatabaseStructureProcedures(): void
     {
         // Listing all procedures from database
         if ($this->option->routines) {
@@ -362,10 +360,8 @@ class Exporter
     /**
      * Reads functions names from database.
      * Fills $this->tables array so they will be dumped later.
-     *
-     * @return null
      */
-    private function getDatabaseStructureFunctions()
+    private function getDatabaseStructureFunctions(): void
     {
         // Listing all functions from database
         if ($this->option->routines) {
@@ -379,7 +375,7 @@ class Exporter
      * Reads event names from database.
      * Fills $this->tables array so they will be dumped later.
      */
-    private function getDatabaseStructureEvents()
+    private function getDatabaseStructureEvents(): void
     {
         // Listing all events from database
         if ($this->option->events) {
@@ -423,9 +419,9 @@ class Exporter
 
             $this->getTableStructure($table);
 
-            if (false === $this->option->no_data) { // don't break compatibility with old trigger
+            if ([] === $this->option->no_data) { // don't break compatibility with old trigger
                 $this->listValues($table);
-            } elseif (true === $this->option->no_data || $this->matches($table, $this->option->no_data)) {
+            } elseif ([] !== $this->option->no_data || $this->matches($table, $this->option->no_data)) {
                 continue;
             } else {
                 $this->listValues($table);
@@ -571,7 +567,7 @@ class Exporter
     /**
      * View structure extractor, create table (avoids cyclic references)
      */
-    private function getViewStructureTable(string $viewName)
+    private function getViewStructureTable(string $viewName): void
     {
         if (! $this->option->skip_comments) {
             $ret = '--' . PHP_EOL .
@@ -615,7 +611,7 @@ class Exporter
     /**
      * View structure extractor, create view
      */
-    private function getViewStructureView(string $viewName)
+    private function getViewStructureView(string $viewName): void
     {
         if (! $this->option->skip_comments) {
             $ret = '--' . PHP_EOL .
@@ -640,7 +636,7 @@ class Exporter
     /**
      * Trigger structure extractor
      */
-    private function getTriggerStructure(string $triggerName)
+    private function getTriggerStructure(string $triggerName): void
     {
         $stmt = $this->adapter->showCreateTrigger($triggerName);
 
@@ -730,7 +726,7 @@ class Exporter
         $ret         = [];
         $columnTypes = $this->tableColumnTypes[$tableName];
 
-        if ($this->transformTableRowCallable) {
+        if ($this->transformTableRowCallable !== null) {
             $row = ($this->transformTableRowCallable)($tableName, $row);
         }
 

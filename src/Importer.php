@@ -28,7 +28,7 @@ class Importer
      *
      * @param string $filename Name of file to read sql dump to
      */
-    public function process(string $filename)
+    public function process(string $filename): void
     {
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
@@ -39,7 +39,9 @@ class Importer
             default => throw Exception::unavailableDriverForcompression($extension),
         };
 
-        $filename = $this->getFile($filename);
+        if (null === $filename = $this->getFile($filename)) {
+			throw Exception::failledToRead(func_get_arg(0));
+		}
 
         if ($this->option->disable_foreign_keys_check && '' !== $disableForeignKeysCheck = $this->adapter->startDisableForeignKeysCheck()) {
             $this->pdo->exec($disableForeignKeysCheck);
@@ -95,27 +97,25 @@ class Importer
     /**
      * Return unzipped file
      */
-    private function getFile(string $source): string
+    private function getFile(string $source): ?string
     {
         $pathinfo = pathinfo($source);
 
         $dest = $pathinfo['dirname'] . '/' . date('Ymd_His', time()) . '_' . $pathinfo['filename'];
 
         // Remove $dest file if exists
-        if (file_exists($dest)) {
-            if (! unlink($dest)) {
-                return false;
-            }
+        if (file_exists($dest) && ! unlink($dest)) {
+			return null;
         }
 
         // Open gzipped and destination files in binary mode
         $this->compressor->open($source, 'rb');
         if (! $dstFile = fopen($dest, 'wb')) {
-            return false;
+            return null;
         }
 
         if (! fwrite($dstFile, $this->compressor->read())) {
-            return false;
+            return null;
         }
 
         fclose($dstFile);
