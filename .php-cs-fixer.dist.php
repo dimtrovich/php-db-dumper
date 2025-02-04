@@ -21,10 +21,7 @@ $finder = Finder::create()
         __DIR__ . '/src',
         __DIR__ . '/spec',
     ])
-    ->notName('#Foobar.php$#')
-    ->append([
-        __FILE__,
-    ]);
+    ->append([__FILE__]);
 
 $overrides = [
     'static_lambda' => false,
@@ -43,5 +40,5 @@ return Factory::create(new Blitz(), $overrides, $options)->forLibrary(
     'dimtrovich/db-dumper"',
     'Dimitri Sitchet Tomkeu',
     'devcode.dst@gmail.com',
-    date('Y')
+    2024
 );

@@ -14,7 +14,7 @@ namespace Dimtrovich\DbDumper;
 class Event
 {
     /**
-     * @var array<string, callable[]>
+     * @var array<string, list<callable>>
      */
     private array $listeners = [];
 

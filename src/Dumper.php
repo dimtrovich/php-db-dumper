@@ -38,10 +38,10 @@ trait Dumper
      */
     private Event $event;
 
-	/**
+    /**
      * Database driver
      */
-	private string $driver;
+    private string $driver;
 
     public function __construct(private string $database, private PDO $pdo, array $options = [])
     {

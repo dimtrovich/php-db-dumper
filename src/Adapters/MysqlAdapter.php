@@ -55,15 +55,11 @@ class MysqlAdapter extends Factory
     /**
      * {@inheritDoc}
      */
-    public function databases(): string
+    public function databases(string $databaseName): string
     {
         if ($this->option->no_create_db) {
             return '';
         }
-
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $args         = func_get_args();
-        $databaseName = $args[0];
 
         $resultSet    = $this->pdo->query("SHOW VARIABLES LIKE 'character_set_database';");
         $characterSet = $resultSet->fetchColumn(1);
@@ -338,14 +334,9 @@ class MysqlAdapter extends Factory
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $database
      */
-    public function showTables(): string
+    public function showTables(string $database): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $database = func_get_arg(0);
-
         return 'SELECT TABLE_NAME AS tbl_name ' .
             'FROM INFORMATION_SCHEMA.TABLES ' .
             "WHERE TABLE_TYPE='BASE TABLE' AND TABLE_SCHEMA='{$database}' " .
@@ -354,14 +345,9 @@ class MysqlAdapter extends Factory
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $database
      */
-    public function showViews(): string
+    public function showViews(string $database): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $database = func_get_arg(0);
-
         return 'SELECT TABLE_NAME AS tbl_name ' .
             'FROM INFORMATION_SCHEMA.TABLES ' .
             "WHERE TABLE_TYPE='VIEW' AND TABLE_SCHEMA='{$database}' " .
@@ -370,40 +356,25 @@ class MysqlAdapter extends Factory
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $database
      */
-    public function showTriggers(): string
+    public function showTriggers(string $database): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $database = func_get_arg(0);
-
         return "SHOW TRIGGERS FROM `{$database}`;";
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $table
      */
-    public function showColumns(): string
+    public function showColumns(string $table): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $table = func_get_arg(0);
-
         return "SHOW COLUMNS FROM `{$table}`;";
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $database
      */
-    public function showProcedures(): string
+    public function showProcedures(string $database): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $database = func_get_arg(0);
-
         return 'SELECT SPECIFIC_NAME AS procedure_name ' .
             'FROM INFORMATION_SCHEMA.ROUTINES ' .
             "WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_SCHEMA='{$database}'";
@@ -411,14 +382,9 @@ class MysqlAdapter extends Factory
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $database
      */
-    public function showFunctions(): string
+    public function showFunctions(string $database): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $database = func_get_arg(0);
-
         return 'SELECT SPECIFIC_NAME AS function_name ' .
             'FROM INFORMATION_SCHEMA.ROUTINES ' .
             "WHERE ROUTINE_TYPE='FUNCTION' AND ROUTINE_SCHEMA='{$database}'";
@@ -426,14 +392,9 @@ class MysqlAdapter extends Factory
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $database
      */
-    public function showEvents(): string
+    public function showEvents(string $database): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $database = func_get_arg(0);
-
         return 'SELECT EVENT_NAME AS event_name ' .
             'FROM INFORMATION_SCHEMA.EVENTS ' .
             "WHERE EVENT_SCHEMA='{$database}'";
@@ -466,10 +427,8 @@ class MysqlAdapter extends Factory
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $table
      */
-    public function lockTable(): false|int
+    public function lockTable(string $table)
     {
         $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
         $table = func_get_arg(0);
@@ -480,62 +439,46 @@ class MysqlAdapter extends Factory
     /**
      * {@inheritDoc}
      */
-    public function unlockTable(): false|int
+    public function unlockTable(string $table)
     {
         return $this->pdo->exec('UNLOCK TABLES');
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $table
      */
-    public function startAddLockTable(): string
+    public function startAddLockTable(string $table): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $table = func_get_arg(0);
-
         return "LOCK TABLES `{$table}` WRITE;" . PHP_EOL;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function endAddLockTable(): string
+    public function endAddLockTable(string $table): string
     {
         return 'UNLOCK TABLES;' . PHP_EOL;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $table
      */
-    public function startAddDisableKeys(): string
+    public function startAddDisableKeys(string $table): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-
-        $table = func_get_arg(0);
-
         return "/*!40000 ALTER TABLE `{$table}` DISABLE KEYS */;" .
             PHP_EOL;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $table
      */
-    public function endAddDisableKeys(): string
+    public function endAddDisableKeys(string $table): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $table = func_get_arg(0);
-
         return "/*!40000 ALTER TABLE `{$table}` ENABLE KEYS */;" .
             PHP_EOL;
     }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     public function startDisableForeignKeysCheck(): string
@@ -569,41 +512,26 @@ class MysqlAdapter extends Factory
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $database
      */
-    public function addDropDatabase(): string
+    public function addDropDatabase(string $database): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $database = func_get_arg(0);
-
         return "/*!40000 DROP DATABASE IF EXISTS `{$database}`*/;" .
             PHP_EOL . PHP_EOL;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $trigger
      */
-    public function addDropTrigger(): string
+    public function addDropTrigger(string $trigger): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $trigger = func_get_arg(0);
-
         return "DROP TRIGGER IF EXISTS `{$trigger}`;" . PHP_EOL;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @param string $view
      */
-    public function dropView(): string
+    public function dropView(string $view): string
     {
-        $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
-        $view = func_get_arg(0);
-
         return "DROP TABLE IF EXISTS `{$view}`;" . PHP_EOL .
                 "/*!50001 DROP VIEW IF EXISTS `{$view}`*/;" . PHP_EOL;
     }
@@ -613,7 +541,7 @@ class MysqlAdapter extends Factory
      */
     public function parseColumnType(array $colType): array
     {
-		$colInfo = parent::_parseColumnType($colType, $this->mysqlTypes);
+        $colInfo = parent::_parseColumnType($colType, $this->mysqlTypes);
         // for virtual columns that are of type 'Extra', column type
         // could by "STORED GENERATED" or "VIRTUAL GENERATED"
         // MySQL reference: https://dev.mysql.com/doc/refman/5.7/en/create-table-generated-columns.html

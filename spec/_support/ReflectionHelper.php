@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/db-dumper".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\DbDumper\Spec;
 
 use Closure;
@@ -35,7 +44,6 @@ class ReflectionHelper
         return static fn (...$args) => $refMethod->invokeArgs($obj, $args);
     }
 
-
     /**
      * Gets an accessible ReflectionProperty for a given object or class and property name.
      *
@@ -66,8 +74,6 @@ class ReflectionHelper
      * @param string        $property The name of the private property to set
      * @param mixed         $value    The value to set for the private property
      *
-     * @return void
-     *
      * @throws ReflectionException If the property does not exist or is not accessible
      */
     public static function setPrivateProperty(object|string $obj, string $property, mixed $value): void
@@ -81,18 +87,18 @@ class ReflectionHelper
         }
     }
 
-	/**
-	* Retrieves the value of a private property from an object or class.
-	*
-	* @param object|string $obj      The object instance or the class name
-	* @param string        $property The name of the private property to access
-	*
-	* @return mixed The value of the private property
-	*/
+    /**
+     * Retrieves the value of a private property from an object or class.
+     *
+     * @param object|string $obj      The object instance or the class name
+     * @param string        $property The name of the private property to access
+     *
+     * @return mixed The value of the private property
+     */
     public static function getPrivateProperty(object|string $obj, string $property): mixed
-   	{
-	   $refProperty = self::getAccessibleRefProperty($obj, $property);
+    {
+        $refProperty = self::getAccessibleRefProperty($obj, $property);
 
-	   return is_string($obj) ? $refProperty->getValue() : $refProperty->getValue($obj);
-   	}
+        return is_string($obj) ? $refProperty->getValue() : $refProperty->getValue($obj);
+    }
 }

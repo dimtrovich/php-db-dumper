@@ -85,9 +85,9 @@ class Exporter
         // initiate a transaction at global level to create a consistent snapshot
         if ($this->option->single_transaction) {
             if ('' !== $setupTransaction = $this->adapter->setupTransaction()) {
-				$this->pdo->exec($setupTransaction);
-			}
-			if ('' !== $startTransaction = $this->adapter->startTransaction()) {
+                $this->pdo->exec($setupTransaction);
+            }
+            if ('' !== $startTransaction = $this->adapter->startTransaction()) {
                 $this->pdo->exec($startTransaction);
             }
         }
@@ -171,15 +171,15 @@ class Exporter
         return false;
     }
 
-	/**
-	 * Sets a WHERE condition for a specific table during the export process.
-	 */
-	public function where(string $table, string $condition): self
-	{
-		$this->tableWheres[$table] = $condition;
+    /**
+     * Sets a WHERE condition for a specific table during the export process.
+     */
+    public function where(string $table, string $condition): self
+    {
+        $this->tableWheres[$table] = $condition;
 
-		return $this;
-	}
+        return $this;
+    }
 
     /**
      * Keyed by table name, with the value as the numeric limit:
@@ -211,15 +211,15 @@ class Exporter
         return $limit;
     }
 
-	/**
-	 * Sets a LIMIT condition for a specific table during the export process.
-	 */
-	public function limit(string $table, int $limit): self
-	{
-		$this->tableLimits[$table] = $limit;
+    /**
+     * Sets a LIMIT condition for a specific table during the export process.
+     */
+    public function limit(string $table, int $limit): self
+    {
+        $this->tableLimits[$table] = $limit;
 
-		return $this;
-	}
+        return $this;
+    }
 
     /**
      * Returns header for dump file.
@@ -238,11 +238,11 @@ class Exporter
                     '-- © ' . date('Y') . ' Dimitri Sitchet Tomkeu' . PHP_EOL .
                     '-- https://github.com/dimtrovich/php-db-dumper' . PHP_EOL .
                     '-- ' . PHP_EOL;
-			if ($this->driver !== 'sqlite' ) {
-		$header .=  '-- Host: ' . $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
-			}
-        $header .=  "-- Database: {$this->database}" . PHP_EOL .
-                    '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . ' Driver: ' . $this->driver . PHP_EOL;
+            if ($this->driver !== 'sqlite') {
+                $header .= '-- Host: ' . $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
+            }
+            $header .= "-- Database: {$this->database}" . PHP_EOL .
+                        '-- Server version: ' . $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION) . ' Driver: ' . $this->driver . PHP_EOL;
 
             if (! $this->option->skip_dump_date) {
                 $header .= '-- ' . PHP_EOL . '-- Generated on: ' . date('r') . PHP_EOL;
@@ -346,10 +346,8 @@ class Exporter
     /**
      * Reads procedure names from database.
      * Fills $this->tables array so they will be dumped later.
-     *
-     * @return null
      */
-    private function getDatabaseStructureProcedures()
+    private function getDatabaseStructureProcedures(): void
     {
         // Listing all procedures from database
         if ($this->option->routines) {
@@ -362,10 +360,8 @@ class Exporter
     /**
      * Reads functions names from database.
      * Fills $this->tables array so they will be dumped later.
-     *
-     * @return null
      */
-    private function getDatabaseStructureFunctions()
+    private function getDatabaseStructureFunctions(): void
     {
         // Listing all functions from database
         if ($this->option->routines) {
@@ -379,7 +375,7 @@ class Exporter
      * Reads event names from database.
      * Fills $this->tables array so they will be dumped later.
      */
-    private function getDatabaseStructureEvents()
+    private function getDatabaseStructureEvents(): void
     {
         // Listing all events from database
         if ($this->option->events) {
@@ -423,9 +419,9 @@ class Exporter
 
             $this->getTableStructure($table);
 
-            if (false === $this->option->no_data) { // don't break compatibility with old trigger
+            if ([] === $this->option->no_data) { // don't break compatibility with old trigger
                 $this->listValues($table);
-            } elseif (true === $this->option->no_data || $this->matches($table, $this->option->no_data)) {
+            } elseif ([] !== $this->option->no_data || $this->matches($table, $this->option->no_data)) {
                 continue;
             } else {
                 $this->listValues($table);
@@ -549,13 +545,13 @@ class Exporter
         );
         $columns->setFetchMode(PDO::FETCH_ASSOC);
 
-		foreach ($columns as $key => $col) {
-			$field = $col['Field'] ?? ($col['name'] ?? '');
-			if ($field === '') {
-				continue; // skip if field name is empty (MySQL 8.0+ returns empty name for computed columns)
-			}
+        foreach ($columns as $key => $col) {
+            $field = $col['Field'] ?? ($col['name'] ?? '');
+            if ($field === '') {
+                continue; // skip if field name is empty (MySQL 8.0+ returns empty name for computed columns)
+            }
 
-            $types                      = $this->adapter->parseColumnType($col);
+            $types               = $this->adapter->parseColumnType($col);
             $columnTypes[$field] = [
                 'is_numeric' => $types['is_numeric'],
                 'is_blob'    => $types['is_blob'],
@@ -571,7 +567,7 @@ class Exporter
     /**
      * View structure extractor, create table (avoids cyclic references)
      */
-    private function getViewStructureTable(string $viewName)
+    private function getViewStructureTable(string $viewName): void
     {
         if (! $this->option->skip_comments) {
             $ret = '--' . PHP_EOL .
@@ -615,7 +611,7 @@ class Exporter
     /**
      * View structure extractor, create view
      */
-    private function getViewStructureView(string $viewName)
+    private function getViewStructureView(string $viewName): void
     {
         if (! $this->option->skip_comments) {
             $ret = '--' . PHP_EOL .
@@ -640,7 +636,7 @@ class Exporter
     /**
      * Trigger structure extractor
      */
-    private function getTriggerStructure(string $triggerName)
+    private function getTriggerStructure(string $triggerName): void
     {
         $stmt = $this->adapter->showCreateTrigger($triggerName);
 
@@ -730,7 +726,7 @@ class Exporter
         $ret         = [];
         $columnTypes = $this->tableColumnTypes[$tableName];
 
-        if ($this->transformTableRowCallable) {
+        if ($this->transformTableRowCallable !== null) {
             $row = ($this->transformTableRowCallable)($tableName, $row);
         }
 
