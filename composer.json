@@ -23,7 +23,7 @@
     "require-dev": {
         "blitz-php/coding-standard": "^1.4",
         "kahlan/kahlan": "^6.0",
-        "phpstan/phpstan": "^1.11"
+        "phpstan/phpstan": "^2.1"
     },
     "autoload": {
         "psr-4": {
